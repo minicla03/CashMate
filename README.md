@@ -17,6 +17,27 @@ CashMate aiuta gli utenti a:
 
 ## 🏗 Architettura
 
+<img width="407" height="1273" alt="image" src="https://github.com/user-attachments/assets/fc9531a1-5587-41c2-89b1-07ac9936db15" />
+
+## Architettura di CashMate
+
+CashMate utilizza un'architettura **Clean/Layered** combinata con il pattern MVC distribuito tra frontend Android e backend FastAPI. La separazione dei layer garantisce modularità, testabilità e scalabilità.
+
+| Layer / Componente | Tipo | Funzione |
+|-------------------|------|----------|
+| **Android UI (View)** | Frontend / View | Mostra le schermate all’utente e riceve input |
+| **ViewModel** | Frontend / Controller | Gestisce lo stato dell’interfaccia e coordina i Use Cases locali |
+| **Use Cases (App Layer)** | Frontend / Use Case | Contiene logica di applicazione lato client, orchestrando Repository e API |
+| **Repository Layer** | Frontend / Repository | Interfaccia tra Use Cases e API Client (Retrofit) |
+| **API Client (Retrofit)** | Frontend / Client HTTP | Esegue le chiamate REST al backend FastAPI |
+| **FastAPI API Layer (Controller)** | Backend / Controller | Riceve le richieste HTTP e invoca i Use Cases backend |
+| **Backend Use Cases / Service Layer** | Backend / Use Case | Contiene la logica di business principale (Clean Architecture) |
+| **DAO Layer (Persistence)** | Backend / Repository | Gestisce l’accesso al database MongoDB |
+| **MongoDB (DB)** | Backend / Database | Persistenza dei dati: utenti, spese e articoli |
+| **Pydantic Models** | Backend / Model | Validazione e serializzazione dei dati tra layer |
+
+> Il flusso end-to-end tipico è:  
+> **User → Android UI → ViewModel → Use Cases → Repository → Retrofit → FastAPI Controller → Backend Use Cases → DAO → MongoDB → risposta inversa fino all’UI**
 
 ---
 
