@@ -1,4 +1,4 @@
-package minicla03.cashmate.ui.dashboard.activity
+package minicla03.cashmate.ui.dashboard.screen
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
