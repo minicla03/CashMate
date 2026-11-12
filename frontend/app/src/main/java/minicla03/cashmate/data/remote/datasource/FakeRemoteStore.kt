@@ -3,21 +3,54 @@ package minicla03.cashmate.data.remote.datasource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import minicla03.cashmate.data.remote.dto.AccountDto
+import minicla03.cashmate.data.remote.dto.AuthResponseDto
+import minicla03.cashmate.data.remote.dto.AuthTokensDto
 import minicla03.cashmate.data.remote.dto.CategoryDto
+import minicla03.cashmate.data.remote.dto.ChangePasswordRequest
 import minicla03.cashmate.data.remote.dto.ConfirmReceiptRequest
+import minicla03.cashmate.data.remote.dto.ConsentItemDto
 import minicla03.cashmate.data.remote.dto.CreateCategoryRequest
 import minicla03.cashmate.data.remote.dto.CreateTransactionRequest
+import minicla03.cashmate.data.remote.dto.DeleteAccountRequest
+import minicla03.cashmate.data.remote.dto.EmailVerificationResponseDto
+import minicla03.cashmate.data.remote.dto.LoginRequest
+import minicla03.cashmate.data.remote.dto.LogoutRequest
+import minicla03.cashmate.data.remote.dto.PasswordResetRequestDto
+import minicla03.cashmate.data.remote.dto.PrivacyDataCategoryDto
+import minicla03.cashmate.data.remote.dto.PrivacyInfoDto
 import minicla03.cashmate.data.remote.dto.ReceiptAdjustmentDto
 import minicla03.cashmate.data.remote.dto.ReceiptDraftDto
 import minicla03.cashmate.data.remote.dto.ReceiptItemDto
+import minicla03.cashmate.data.remote.dto.RefreshTokenRequest
+import minicla03.cashmate.data.remote.dto.RegisterRequest
+import minicla03.cashmate.data.remote.dto.RegisterResponseDto
+import minicla03.cashmate.data.remote.dto.ResendVerificationRequest
+import minicla03.cashmate.data.remote.dto.ResetPasswordRequest
 import minicla03.cashmate.data.remote.dto.TransactionDto
 import minicla03.cashmate.data.remote.dto.TransactionFilterDto
 import minicla03.cashmate.data.remote.dto.UpdateCategoryRequest
+import minicla03.cashmate.data.remote.dto.UpdateConsentRequest
+import minicla03.cashmate.data.remote.dto.UpdateProfileRequest
 import minicla03.cashmate.data.remote.dto.UpdateTransactionRequest
+import minicla03.cashmate.data.remote.dto.UserDataExportDto
+import minicla03.cashmate.data.remote.dto.UserDto
+import minicla03.cashmate.data.remote.dto.UserPreferencesDto
+import minicla03.cashmate.data.remote.dto.VerifyEmailRequest
 import minicla03.cashmate.data.remote.mapper.CategoryInUseException
 import minicla03.cashmate.data.remote.mapper.DuplicateCategoryException
+import minicla03.cashmate.data.remote.mapper.EmailAlreadyExistsException
+import minicla03.cashmate.data.remote.mapper.EmailNotVerifiedException
+import minicla03.cashmate.data.remote.mapper.InvalidCredentialsException
+import minicla03.cashmate.data.remote.mapper.InvalidCurrentPasswordException
+import minicla03.cashmate.data.remote.mapper.InvalidResetTokenException
+import minicla03.cashmate.data.remote.mapper.InvalidVerificationTokenException
 import minicla03.cashmate.data.remote.mapper.LastCategoryDeletionException
+import minicla03.cashmate.data.remote.mapper.RequiredConsentCannotBeRevokedException
+import minicla03.cashmate.data.remote.mapper.UnprocessableEntityException
 import minicla03.cashmate.data.remote.mapper.UnsupportedImageException
 import minicla03.cashmate.domain.model.ReceiptImage
 import okhttp3.MediaType.Companion.toMediaType
@@ -77,6 +110,304 @@ class FakeRemoteStore @Inject constructor(
     private val receiptDrafts = mutableMapOf<String, ReceiptDraftDto>()
     private val confirmedReceipts = seedConfirmedReceipts(LocalDate.now(clock)).toMutableMap()
     private val transactions: MutableList<TransactionDto> = seedTransactions(LocalDate.now(clock)).toMutableList()
+
+    private data class FakeUserRecord(
+        val id: String,
+        val name: String,
+        val email: String,
+        val password: String,
+        val emailVerified: Boolean,
+        val createdAt: String,
+        val preferences: UserPreferencesDto = UserPreferencesDto(),
+        val consents: List<ConsentItemDto> = defaultConsents()
+    )
+
+    private val users = mutableListOf(
+        FakeUserRecord(
+            id = SEEDED_USER_ID,
+            name = "cla",
+            email = SEEDED_USER_EMAIL,
+            password = SEEDED_USER_PASSWORD,
+            emailVerified = true,
+            createdAt = "2026-01-15T10:00:00Z"
+        ),
+        FakeUserRecord(
+            id = "user-unverified",
+            name = "Pending User",
+            email = SEEDED_UNVERIFIED_EMAIL,
+            password = SEEDED_USER_PASSWORD,
+            emailVerified = false,
+            createdAt = "2026-10-01T09:00:00Z"
+        )
+    )
+    private val verificationTokens = mutableMapOf(
+        SEEDED_UNVERIFIED_EMAIL to DEMO_VERIFICATION_CODE
+    )
+    private val resetTokens = mutableMapOf<String, String>()
+    private val refreshTokenOwner = mutableMapOf<String, String>()
+    private var activeUserId: String? = null
+    private val exportJson = Json { prettyPrint = true; encodeDefaults = true }
+
+    suspend fun login(request: LoginRequest): AuthResponseDto = executeRemote {
+        val email = request.email.trim().lowercase()
+        val user = users.firstOrNull { it.email.equals(email, ignoreCase = true) }
+            ?: throw InvalidCredentialsException()
+        if (user.password != request.password) {
+            throw InvalidCredentialsException()
+        }
+        if (!user.emailVerified) {
+            throw EmailNotVerifiedException()
+        }
+        activeUserId = user.id
+        val tokens = issueTokens(user.id)
+        AuthResponseDto(user = user.toDto(), tokens = tokens)
+    }
+
+    suspend fun register(request: RegisterRequest): RegisterResponseDto = executeRemote {
+        val email = request.email.trim().lowercase()
+        if (users.any { it.email.equals(email, ignoreCase = true) }) {
+            throw EmailAlreadyExistsException()
+        }
+        val created = FakeUserRecord(
+            id = "user-${idSequence.incrementAndGet()}",
+            name = request.name.trim(),
+            email = email,
+            password = request.password,
+            emailVerified = false,
+            createdAt = clock.instant().toString()
+        )
+        users.add(created)
+        verificationTokens[email] = DEMO_VERIFICATION_CODE
+        RegisterResponseDto(
+            user = created.toDto(),
+            requiresEmailVerification = true,
+            tokens = null
+        )
+    }
+
+    suspend fun logout(request: LogoutRequest) {
+        executeRemote {
+            request.refreshToken?.let { refreshTokenOwner.remove(it) }
+            activeUserId = null
+        }
+    }
+
+    suspend fun refreshToken(request: RefreshTokenRequest): AuthTokensDto = executeRemote {
+        val userId = refreshTokenOwner.remove(request.refreshToken) ?: throw unauthorizedException()
+        if (users.none { it.id == userId }) {
+            throw unauthorizedException()
+        }
+        activeUserId = userId
+        issueTokens(userId)
+    }
+
+    suspend fun verifyEmail(request: VerifyEmailRequest): EmailVerificationResponseDto = executeRemote {
+        val email = request.email.trim().lowercase()
+        val index = users.indexOfFirst { it.email.equals(email, ignoreCase = true) }
+        if (index < 0) throw InvalidVerificationTokenException()
+        val expectedToken = verificationTokens[email]
+        if (expectedToken == null || request.token.trim() != expectedToken) {
+            throw InvalidVerificationTokenException()
+        }
+        verificationTokens.remove(email)
+        users[index] = users[index].copy(emailVerified = true)
+        EmailVerificationResponseDto(email = users[index].email, verified = true)
+    }
+
+    suspend fun resendVerificationEmail(request: ResendVerificationRequest) {
+        executeRemote {
+            val email = request.email.trim().lowercase()
+            if (users.any { it.email.equals(email, ignoreCase = true) }) {
+                verificationTokens[email] = DEMO_VERIFICATION_CODE
+            }
+        }
+    }
+
+    suspend fun requestPasswordReset(request: PasswordResetRequestDto) {
+        executeRemote {
+            val email = request.email.trim().lowercase()
+            if (users.any { it.email.equals(email, ignoreCase = true) }) {
+                resetTokens[email] = DEMO_RESET_CODE
+            }
+        }
+    }
+
+    suspend fun resetPassword(request: ResetPasswordRequest) {
+        executeRemote {
+            val email = request.email.trim().lowercase()
+            val index = users.indexOfFirst { it.email.equals(email, ignoreCase = true) }
+            val expectedToken = resetTokens[email]
+            if (index < 0 || expectedToken == null || request.token.trim() != expectedToken) {
+                throw InvalidResetTokenException()
+            }
+            resetTokens.remove(email)
+            users[index] = users[index].copy(password = request.newPassword)
+            refreshTokenOwner.entries.removeAll { it.value == users[index].id }
+        }
+    }
+
+    suspend fun getCurrentUser(): UserDto = executeRemote {
+        requireActiveUser().toDto()
+    }
+
+    suspend fun updateProfile(request: UpdateProfileRequest): UserDto = executeRemote {
+        val active = requireActiveUser()
+        val newEmail = request.email.trim().lowercase()
+        val duplicate = users.any { it.id != active.id && it.email.equals(newEmail, ignoreCase = true) }
+        if (duplicate) throw EmailAlreadyExistsException()
+        val index = users.indexOfFirst { it.id == active.id }
+        val updated = active.copy(
+            name = request.name.trim(),
+            email = newEmail
+        )
+        users[index] = updated
+        updated.toDto()
+    }
+
+    suspend fun changePassword(request: ChangePasswordRequest) {
+        executeRemote {
+            val active = requireActiveUser()
+            if (active.password != request.currentPassword) {
+                throw InvalidCurrentPasswordException()
+            }
+            val index = users.indexOfFirst { it.id == active.id }
+            users[index] = active.copy(password = request.newPassword)
+        }
+    }
+
+    suspend fun getPreferences(): UserPreferencesDto = executeRemote {
+        requireActiveUser().preferences
+    }
+
+    suspend fun updatePreferences(request: UserPreferencesDto): UserPreferencesDto = executeRemote {
+        val active = requireActiveUser()
+        val index = users.indexOfFirst { it.id == active.id }
+        val updated = active.copy(preferences = request)
+        users[index] = updated
+        updated.preferences
+    }
+
+    suspend fun getPrivacyInfo(): PrivacyInfoDto = executeRemote {
+        val active = requireActiveUser()
+        PrivacyInfoDto(
+            summary = "CashMate stores only the account, preference, and financial data required to provide expense tracking and receipt parsing via the backend.",
+            dataCategories = listOf(
+                PrivacyDataCategoryDto(
+                    id = "data-account",
+                    title = "Account & profile",
+                    description = "Your display name, email address, verification status, and account creation timestamp.",
+                    retentionSummary = "Retained while your account remains active."
+                ),
+                PrivacyDataCategoryDto(
+                    id = "data-preferences",
+                    title = "Application preferences",
+                    description = "Your selected theme mode and display currency.",
+                    retentionSummary = "Retained with your account preferences."
+                ),
+                PrivacyDataCategoryDto(
+                    id = "data-finance",
+                    title = "Transactions, categories & accounts",
+                    description = "Expense and income entries, category labels, and confirmed receipt line items.",
+                    retentionSummary = "Retained until modified or deleted by you, or upon account deletion."
+                ),
+                PrivacyDataCategoryDto(
+                    id = "data-receipts",
+                    title = "Receipt uploads",
+                    description = "Images uploaded for server-side OCR processing and structured item extraction.",
+                    retentionSummary = "Receipt image lifecycle is governed by backend retention policies."
+                )
+            ),
+            consents = active.consents,
+            policyUpdatedAt = "2026-11-01"
+        )
+    }
+
+    suspend fun updateConsent(consentId: String, request: UpdateConsentRequest): List<ConsentItemDto> =
+        executeRemote {
+            val active = requireActiveUser()
+            val consentIndex = active.consents.indexOfFirst { it.id == consentId }
+            if (consentIndex < 0) throw notFoundException()
+            val target = active.consents[consentIndex]
+            if (target.required && !request.granted) {
+                throw RequiredConsentCannotBeRevokedException()
+            }
+            val updatedConsents = active.consents.toMutableList()
+            updatedConsents[consentIndex] = target.copy(
+                granted = request.granted,
+                updatedAt = clock.instant().toString()
+            )
+            val userIndex = users.indexOfFirst { it.id == active.id }
+            users[userIndex] = active.copy(consents = updatedConsents)
+            updatedConsents
+        }
+
+    suspend fun exportUserData(): UserDataExportDto = executeRemote {
+        val active = requireActiveUser()
+        val payload = FakeExportPayload(
+            exportedAt = clock.instant().toString(),
+            user = active.toDto(),
+            preferences = active.preferences,
+            consents = active.consents,
+            accounts = accounts.toList(),
+            categories = categories.toList(),
+            transactions = transactions.toList()
+        )
+        val jsonBytes = exportJson.encodeToString(payload).toByteArray(Charsets.UTF_8)
+        UserDataExportDto(
+            fileName = "cashmate-export-${LocalDate.now(clock)}.json",
+            mimeType = "application/json",
+            contentBytes = jsonBytes,
+            generatedAt = payload.exportedAt
+        )
+    }
+
+    suspend fun deleteAccount(request: DeleteAccountRequest) {
+        executeRemote {
+            val active = requireActiveUser()
+            if (request.confirmation.trim() != "DELETE") {
+                throw UnprocessableEntityException()
+            }
+            users.removeAll { it.id == active.id }
+            refreshTokenOwner.entries.removeAll { it.value == active.id }
+            activeUserId = null
+        }
+    }
+
+    private fun requireActiveUser(): FakeUserRecord {
+        val id = activeUserId ?: throw unauthorizedException()
+        return users.firstOrNull { it.id == id } ?: throw unauthorizedException()
+    }
+
+    private fun issueTokens(userId: String): AuthTokensDto {
+        val seq = idSequence.incrementAndGet()
+        val accessToken = "fake-access-$userId-$seq"
+        val refreshToken = "fake-refresh-$userId-$seq"
+        refreshTokenOwner[refreshToken] = userId
+        return AuthTokensDto(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+            expiresInSeconds = 3600L
+        )
+    }
+
+    private fun FakeUserRecord.toDto(): UserDto = UserDto(
+        id = id,
+        name = name,
+        email = email,
+        emailVerified = emailVerified,
+        createdAt = createdAt
+    )
+
+    @Serializable
+    private data class FakeExportPayload(
+        val exportedAt: String,
+        val user: UserDto,
+        val preferences: UserPreferencesDto,
+        val consents: List<ConsentItemDto>,
+        val accounts: List<AccountDto>,
+        val categories: List<CategoryDto>,
+        val transactions: List<TransactionDto>
+    )
 
     suspend fun getTransactions(filter: TransactionFilterDto?): List<TransactionDto> = executeRemote {
         val fromDate = filter?.from?.let(LocalDate::parse)
@@ -386,6 +717,10 @@ class FakeRemoteStore @Inject constructor(
         Response.error<Unit>(404, "".toResponseBody("application/json".toMediaType()))
     )
 
+    private fun unauthorizedException(): HttpException = HttpException(
+        Response.error<Unit>(401, "".toResponseBody("application/json".toMediaType()))
+    )
+
     private fun seedTransactions(today: LocalDate): List<TransactionDto> {
         val currentMonth = YearMonth.from(today)
         fun currentMonthDay(day: Int): String =
@@ -541,6 +876,39 @@ class FakeRemoteStore @Inject constructor(
     companion object {
         const val DEFAULT_ACCOUNT_ID = "acc-main"
         const val SEEDED_RECEIPT_ID = "receipt-seed-107"
+        const val SEEDED_USER_ID = "user-1"
+        const val SEEDED_USER_EMAIL = "user@example.com"
+        const val SEEDED_UNVERIFIED_EMAIL = "pending@example.com"
+        const val SEEDED_USER_PASSWORD = "Password123!"
+        const val DEMO_VERIFICATION_CODE = "123456"
+        const val DEMO_RESET_CODE = "123456"
+
+        private fun defaultConsents(): List<ConsentItemDto> = listOf(
+            ConsentItemDto(
+                id = "consent-essential",
+                title = "Core account & financial storage",
+                description = "Required to authenticate your account and store your transactions, categories, and preferences.",
+                required = true,
+                granted = true,
+                updatedAt = "2026-01-15T10:00:00Z"
+            ),
+            ConsentItemDto(
+                id = "consent-receipt-ocr",
+                title = "Receipt categorization improvements",
+                description = "Optional processing to improve automated category matching on uploaded receipts.",
+                required = false,
+                granted = false,
+                updatedAt = "2026-01-15T10:00:00Z"
+            ),
+            ConsentItemDto(
+                id = "consent-product-updates",
+                title = "Account & feature announcements",
+                description = "Optional email updates about new CashMate capabilities.",
+                required = false,
+                granted = false,
+                updatedAt = "2026-01-15T10:00:00Z"
+            )
+        )
     }
 }
 

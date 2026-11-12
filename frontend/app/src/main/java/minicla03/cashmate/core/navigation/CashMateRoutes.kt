@@ -8,6 +8,21 @@ import kotlinx.serialization.Serializable
 sealed interface CashMateRoute {
 
     @Serializable
+    data object Login : CashMateRoute
+
+    @Serializable
+    data object Register : CashMateRoute
+
+    @Serializable
+    data class EmailVerification(val email: String = "") : CashMateRoute
+
+    @Serializable
+    data object ForgotPassword : CashMateRoute
+
+    @Serializable
+    data class ResetPassword(val email: String = "") : CashMateRoute
+
+    @Serializable
     data object Dashboard : CashMateRoute
 
     @Serializable
@@ -27,6 +42,27 @@ sealed interface CashMateRoute {
 
     @Serializable
     data object Settings : CashMateRoute
+
+    @Serializable
+    data object Profile : CashMateRoute
+
+    @Serializable
+    data object EditProfile : CashMateRoute
+
+    @Serializable
+    data object ChangePassword : CashMateRoute
+
+    @Serializable
+    data object Preferences : CashMateRoute
+
+    @Serializable
+    data object Privacy : CashMateRoute
+
+    @Serializable
+    data object ExportData : CashMateRoute
+
+    @Serializable
+    data object DeleteAccount : CashMateRoute
 
     @Serializable
     data object ReceiptFlow : CashMateRoute

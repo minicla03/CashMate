@@ -5,13 +5,17 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import minicla03.cashmate.data.remote.datasource.AccountRemoteDataSource
+import minicla03.cashmate.data.remote.datasource.AuthRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.CategoryRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.FakeAccountRemoteDataSource
+import minicla03.cashmate.data.remote.datasource.FakeAuthRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.FakeCategoryRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.FakeReceiptRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.FakeTransactionRemoteDataSource
+import minicla03.cashmate.data.remote.datasource.FakeUserRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.ReceiptRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.TransactionRemoteDataSource
+import minicla03.cashmate.data.remote.datasource.UserRemoteDataSource
 import javax.inject.Singleton
 
 /**
@@ -21,6 +25,18 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataSourceModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRemoteDataSource(
+        impl: FakeAuthRemoteDataSource
+    ): AuthRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRemoteDataSource(
+        impl: FakeUserRemoteDataSource
+    ): UserRemoteDataSource
 
     @Binds
     @Singleton

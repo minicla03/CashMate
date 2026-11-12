@@ -3,5 +3,7 @@
     <cache-path
         name="receipt_temp"
         path="receipt_temp/" />
+    <cache-path
+        name="exports"
+        path="exports/" />
 </paths>
-

@@ -8,7 +8,7 @@ import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Dashboard
-import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -40,8 +40,20 @@ import androidx.navigation.toRoute
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import minicla03.cashmate.R
+import minicla03.cashmate.feature.auth.forgotpassword.ForgotPasswordRoute
+import minicla03.cashmate.feature.auth.forgotpassword.ResetPasswordRoute
+import minicla03.cashmate.feature.auth.login.LoginRoute
+import minicla03.cashmate.feature.auth.register.RegisterRoute
+import minicla03.cashmate.feature.auth.verification.EmailVerificationRoute
 import minicla03.cashmate.feature.categories.CategoriesRoute
 import minicla03.cashmate.feature.dashboard.DashboardRoute
+import minicla03.cashmate.feature.profile.deleteaccount.DeleteAccountRoute
+import minicla03.cashmate.feature.profile.export.ExportDataRoute
+import minicla03.cashmate.feature.profile.preferences.PreferencesRoute
+import minicla03.cashmate.feature.profile.privacy.PrivacyRoute
+import minicla03.cashmate.feature.profile.profile.ChangePasswordRoute
+import minicla03.cashmate.feature.profile.profile.EditProfileRoute
+import minicla03.cashmate.feature.profile.profile.ProfileRoute
 import minicla03.cashmate.feature.receipt.presentation.ReceiptReviewRoute
 import minicla03.cashmate.feature.receipt.presentation.ReceiptScanRoute
 import minicla03.cashmate.feature.receipt.presentation.ReceiptScanViewModel
@@ -59,7 +71,71 @@ private enum class TopLevelDestination(
     DASHBOARD(CashMateRoute.Dashboard, R.string.nav_dashboard, Icons.Rounded.Dashboard),
     TRANSACTIONS(CashMateRoute.Transactions, R.string.nav_transactions, Icons.AutoMirrored.Rounded.ReceiptLong),
     STATISTICS(CashMateRoute.Statistics, R.string.nav_statistics, Icons.Rounded.BarChart),
-    SETTINGS(CashMateRoute.Settings, R.string.nav_settings, Icons.Rounded.Settings)
+    PROFILE(CashMateRoute.Profile, R.string.nav_profile, Icons.Rounded.Person)
+}
+
+@Composable
+fun CashMateAuthNavHost(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
+    NavHost(
+        navController = navController,
+        startDestination = CashMateRoute.Login,
+        modifier = modifier.fillMaxSize()
+    ) {
+        composable<CashMateRoute.Login> {
+            LoginRoute(
+                onNavigateToForgotPassword = {
+                    navController.navigate(CashMateRoute.ForgotPassword)
+                },
+                onNavigateToRegister = {
+                    navController.navigate(CashMateRoute.Register)
+                },
+                onNavigateToEmailVerification = { email ->
+                    navController.navigate(CashMateRoute.EmailVerification(email))
+                }
+            )
+        }
+
+        composable<CashMateRoute.Register> {
+            RegisterRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEmailVerification = { email ->
+                    navController.navigate(CashMateRoute.EmailVerification(email)) {
+                        popUpTo(CashMateRoute.Login)
+                    }
+                }
+            )
+        }
+
+        composable<CashMateRoute.EmailVerification> {
+            EmailVerificationRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onVerifiedNavigateToLogin = {
+                    navController.popBackStack(CashMateRoute.Login, inclusive = false)
+                }
+            )
+        }
+
+        composable<CashMateRoute.ForgotPassword> {
+            ForgotPasswordRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToResetPassword = { email ->
+                    navController.navigate(CashMateRoute.ResetPassword(email))
+                }
+            )
+        }
+
+        composable<CashMateRoute.ResetPassword> {
+            ResetPasswordRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onResetCompleted = {
+                    navController.popBackStack(CashMateRoute.Login, inclusive = false)
+                }
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -219,6 +295,82 @@ fun CashMateAppScaffold(
                     onNavigateToCategories = {
                         navController.navigate(CashMateRoute.Categories)
                     }
+                )
+            }
+
+            composable<CashMateRoute.Profile> {
+                ProfileRoute(
+                    onNavigateToEditProfile = {
+                        navController.navigate(CashMateRoute.EditProfile)
+                    },
+                    onNavigateToChangePassword = {
+                        navController.navigate(CashMateRoute.ChangePassword)
+                    },
+                    onNavigateToPreferences = {
+                        navController.navigate(CashMateRoute.Preferences)
+                    },
+                    onNavigateToCategories = {
+                        navController.navigate(CashMateRoute.Categories)
+                    },
+                    onNavigateToPrivacy = {
+                        navController.navigate(CashMateRoute.Privacy)
+                    },
+                    onNavigateToExportData = {
+                        navController.navigate(CashMateRoute.ExportData)
+                    },
+                    onNavigateToDeleteAccount = {
+                        navController.navigate(CashMateRoute.DeleteAccount)
+                    }
+                )
+            }
+
+            composable<CashMateRoute.EditProfile> {
+                EditProfileRoute(
+                    onNavigateBack = { navController.popBackStack() },
+                    onSaved = {
+                        navController.popBackStack()
+                        showMessage(R.string.edit_profile_saved_message)
+                    }
+                )
+            }
+
+            composable<CashMateRoute.ChangePassword> {
+                ChangePasswordRoute(
+                    onNavigateBack = { navController.popBackStack() },
+                    onPasswordChanged = {
+                        navController.popBackStack()
+                        showMessage(R.string.change_password_success_message)
+                    }
+                )
+            }
+
+            composable<CashMateRoute.Preferences> {
+                PreferencesRoute(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<CashMateRoute.Privacy> {
+                PrivacyRoute(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToExportData = {
+                        navController.navigate(CashMateRoute.ExportData)
+                    },
+                    onNavigateToDeleteAccount = {
+                        navController.navigate(CashMateRoute.DeleteAccount)
+                    }
+                )
+            }
+
+            composable<CashMateRoute.ExportData> {
+                ExportDataRoute(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<CashMateRoute.DeleteAccount> {
+                DeleteAccountRoute(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

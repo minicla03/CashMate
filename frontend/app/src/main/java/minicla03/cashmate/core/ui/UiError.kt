@@ -19,13 +19,23 @@ fun AppError.toUiError(): UiError = when (this) {
     AppError.Network.Forbidden -> UiError(R.string.error_forbidden, canRetry = false)
     AppError.Network.BadRequest -> UiError(R.string.error_bad_request, canRetry = false)
     AppError.Network.NotFound -> UiError(R.string.error_not_found, canRetry = true)
+    AppError.Network.Conflict -> UiError(R.string.error_conflict, canRetry = false)
+    AppError.Network.UnprocessableEntity -> UiError(R.string.error_unprocessable_entity, canRetry = false)
+    AppError.Network.TooManyRequests -> UiError(R.string.error_too_many_requests, canRetry = true)
     AppError.Network.ServerError -> UiError(R.string.error_server, canRetry = true)
     AppError.Network.Unknown -> UiError(R.string.error_network_unknown, canRetry = true)
+    AppError.Auth.InvalidCredentials -> UiError(R.string.error_auth_invalid_credentials, canRetry = false)
+    AppError.Auth.EmailNotVerified -> UiError(R.string.error_auth_email_not_verified, canRetry = false)
+    AppError.Auth.SessionExpired -> UiError(R.string.error_auth_session_expired, canRetry = false)
+    AppError.Auth.EmailAlreadyExists -> UiError(R.string.error_auth_email_already_exists, canRetry = false)
+    AppError.Auth.InvalidVerificationToken -> UiError(R.string.error_auth_invalid_verification_token, canRetry = false)
+    AppError.Auth.InvalidResetToken -> UiError(R.string.error_auth_invalid_reset_token, canRetry = false)
+    AppError.Auth.InvalidCurrentPassword -> UiError(R.string.error_auth_invalid_current_password, canRetry = false)
     AppError.Receipt.ProcessingFailed -> UiError(R.string.error_receipt_processing_failed, canRetry = true)
     AppError.Receipt.InvalidReceipt -> UiError(R.string.error_receipt_invalid, canRetry = false)
     AppError.Receipt.UnsupportedImage -> UiError(R.string.error_receipt_unsupported_image, canRetry = false)
     is AppError.BusinessRule -> UiError(reason.toMessageResId(), canRetry = false)
-    is AppError.Validation -> UiError(R.string.error_unknown, canRetry = false)
+    is AppError.Validation -> UiError(R.string.error_bad_request, canRetry = false)
     AppError.Unknown -> UiError(R.string.error_unknown, canRetry = true)
 }
 
@@ -35,6 +45,7 @@ fun BusinessErrorReason.toMessageResId(): Int = when (this) {
     BusinessErrorReason.CATEGORY_ALREADY_EXISTS -> R.string.error_category_duplicate
     BusinessErrorReason.CANNOT_DELETE_LAST_CATEGORY -> R.string.error_last_category
     BusinessErrorReason.RECEIPT_NOT_READY -> R.string.error_receipt_not_ready
+    BusinessErrorReason.REQUIRED_CONSENT_CANNOT_BE_REVOKED -> R.string.error_required_consent_locked
 }
 
 fun AppError.Validation.toFieldMessageResIds(): Map<ValidationField, Int> =
@@ -67,5 +78,28 @@ fun ValidationReason.toMessageResId(field: ValidationField): Int = when (field) 
     ValidationField.ITEM_PRICE -> R.string.validation_receipt_item_price_non_negative
     ValidationField.ADJUSTMENT_DESCRIPTION -> R.string.validation_receipt_adjustment_description_required
     ValidationField.ADJUSTMENT_AMOUNT -> R.string.validation_receipt_adjustment_amount_non_negative
+    ValidationField.EMAIL -> when (this) {
+        ValidationReason.INVALID_FORMAT -> R.string.validation_email_invalid
+        ValidationReason.TOO_LONG -> R.string.validation_email_too_long
+        else -> R.string.validation_email_required
+    }
+    ValidationField.NAME -> when (this) {
+        ValidationReason.TOO_LONG -> R.string.validation_name_too_long
+        else -> R.string.validation_name_required
+    }
+    ValidationField.PASSWORD,
+    ValidationField.NEW_PASSWORD -> when (this) {
+        ValidationReason.TOO_SHORT -> R.string.validation_password_too_short
+        ValidationReason.TOO_LONG -> R.string.validation_password_too_long
+        else -> R.string.validation_password_required
+    }
+    ValidationField.CURRENT_PASSWORD -> R.string.validation_current_password_required
+    ValidationField.CONFIRM_PASSWORD -> when (this) {
+        ValidationReason.MISMATCH -> R.string.validation_passwords_do_not_match
+        else -> R.string.validation_confirm_password_required
+    }
+    ValidationField.VERIFICATION_TOKEN -> R.string.validation_verification_token_required
+    ValidationField.RESET_TOKEN -> R.string.validation_reset_token_required
+    ValidationField.DELETE_CONFIRMATION -> R.string.validation_delete_confirmation_mismatch
 }
 

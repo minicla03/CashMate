@@ -4,10 +4,15 @@ import javax.inject.Inject
 
 /**
  * Abstraction supplying an access token for authenticated backend requests.
- * For the unauthenticated MVP, [NoOpTokenProvider] supplies null so no Authorization header is sent.
  */
 interface TokenProvider {
     fun getAccessToken(): String?
+}
+
+class StorageTokenProvider @Inject constructor(
+    private val tokenStorage: TokenStorage
+) : TokenProvider {
+    override fun getAccessToken(): String? = tokenStorage.getAccessToken()
 }
 
 class NoOpTokenProvider @Inject constructor() : TokenProvider {

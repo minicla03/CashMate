@@ -6,6 +6,7 @@
     <string name="nav_transactions">Transazioni</string>
     <string name="nav_statistics">Statistiche</string>
     <string name="nav_settings">Impostazioni</string>
+    <string name="nav_profile">Profilo</string>
     <string name="cd_navigate_back">Torna indietro</string>
     <string name="cd_add_transaction">Aggiungi transazione</string>
     <string name="cd_add_category">Aggiungi categoria</string>
@@ -29,9 +30,20 @@
     <string name="error_forbidden">Non hai i permessi per eseguire questa operazione.</string>
     <string name="error_bad_request">I dati inviati non sono validi. Controlla i campi e riprova.</string>
     <string name="error_not_found">L\'elemento richiesto non è stato trovato.</string>
+    <string name="error_conflict">La richiesta è in conflitto con i dati dell\'account esistenti.</string>
+    <string name="error_unprocessable_entity">Impossibile elaborare i dati inviati. Controlla e riprova.</string>
+    <string name="error_too_many_requests">Troppi tentativi. Attendi un momento e riprova.</string>
     <string name="error_server">Impossibile raggiungere il server al momento. Riprova più tardi.</string>
     <string name="error_network_unknown">Errore di rete. Riprova.</string>
     <string name="error_unknown">Errore imprevisto. Riprova.</string>
+    <string name="error_auth_invalid_credentials">Email o password non validi. Riprova.</string>
+    <string name="error_auth_email_not_verified">Il tuo indirizzo email non è ancora verificato. Verifica l\'email prima di accedere.</string>
+    <string name="error_auth_session_expired">La sessione è scaduta. Effettua nuovamente l\'accesso.</string>
+    <string name="error_auth_email_already_exists">Esiste già un account con questa email.</string>
+    <string name="error_auth_invalid_verification_token">Il codice di verifica non è valido o è scaduto. Richiedi un nuovo codice e riprova.</string>
+    <string name="error_auth_invalid_reset_token">Il codice di reimpostazione non è valido o è scaduto. Richiedi un nuovo reset e riprova.</string>
+    <string name="error_auth_invalid_current_password">La password attuale non è corretta.</string>
+    <string name="error_required_consent_locked">I consensi obbligatori sono necessari per utilizzare il servizio e non possono essere disattivati.</string>
     <string name="error_category_in_use">Questa categoria è associata a transazioni esistenti e non può essere eliminata.</string>
     <string name="error_category_duplicate">Esiste già una categoria con questo nome.</string>
     <string name="error_last_category">Deve rimanere disponibile almeno una categoria.</string>
@@ -59,6 +71,20 @@
     <string name="validation_receipt_item_price_non_negative">Gli importi del prodotto devono essere maggiori o uguali a zero.</string>
     <string name="validation_receipt_adjustment_description_required">Ogni rettifica deve avere una descrizione.</string>
     <string name="validation_receipt_adjustment_amount_non_negative">L\'importo della rettifica deve essere maggiore o uguale a zero.</string>
+    <string name="validation_email_required">L\'indirizzo email è obbligatorio.</string>
+    <string name="validation_email_invalid">Inserisci un indirizzo email valido.</string>
+    <string name="validation_email_too_long">L\'indirizzo email è troppo lungo.</string>
+    <string name="validation_name_required">Il nome è obbligatorio.</string>
+    <string name="validation_name_too_long">Il nome è troppo lungo (massimo 80 caratteri).</string>
+    <string name="validation_password_required">La password è obbligatoria.</string>
+    <string name="validation_password_too_short">La password deve contenere almeno 8 caratteri.</string>
+    <string name="validation_password_too_long">La password è troppo lunga.</string>
+    <string name="validation_current_password_required">La password attuale è obbligatoria.</string>
+    <string name="validation_confirm_password_required">Conferma la password.</string>
+    <string name="validation_passwords_do_not_match">Le password non corrispondono.</string>
+    <string name="validation_verification_token_required">Inserisci il codice di verifica ricevuto via email.</string>
+    <string name="validation_reset_token_required">Inserisci il codice di reimpostazione ricevuto via email.</string>
+    <string name="validation_delete_confirmation_mismatch">Digita DELETE per confermare l\'eliminazione dell\'account.</string>
 
     <!-- Transaction Types -->
     <string name="transaction_type_income">Entrata</string>
@@ -266,4 +292,124 @@
     <string name="permission_gallery_permanently_denied_message">L\'accesso alle foto è disattivato. Apri le impostazioni dell\'app per abilitarlo oppure scatta una nuova foto.</string>
     <string name="permission_action_open_settings">Apri impostazioni</string>
     <string name="permission_action_grant">Consenti accesso</string>
+
+    <!-- Authentication -->
+    <string name="auth_loading_session">Verifica della sessione in corso…</string>
+    <string name="auth_login_title">Bentornato</string>
+    <string name="auth_login_subtitle">Accedi per gestire il tuo account CashMate e le tue finanze.</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_email_hint">user@example.com</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_sign_in">Accedi</string>
+    <string name="auth_forgot_password">Password dimenticata?</string>
+    <string name="auth_no_account_prompt">Non hai un account?</string>
+    <string name="auth_create_account">Crea account</string>
+    <string name="auth_verify_now">Verifica email</string>
+    <string name="cd_toggle_password_visibility">Mostra o nascondi password</string>
+
+    <string name="auth_register_title">Crea account</string>
+    <string name="auth_register_subtitle">Configura il tuo account CashMate per gestire le tue finanze.</string>
+    <string name="auth_name_label">Nome</string>
+    <string name="auth_name_hint">Il tuo nome</string>
+    <string name="auth_confirm_password_label">Conferma password</string>
+    <string name="auth_register_button">Crea account</string>
+    <string name="auth_have_account_prompt">Hai già un account?</string>
+    <string name="auth_sign_in_instead">Accedi</string>
+
+    <string name="auth_verify_title">Verifica la tua email</string>
+    <string name="auth_verify_subtitle">Inserisci il codice di verifica inviato a %1$s.</string>
+    <string name="auth_verify_token_label">Codice di verifica</string>
+    <string name="auth_verify_token_hint">Inserisci codice</string>
+    <string name="auth_verify_button">Verifica email</string>
+    <string name="auth_resend_verification">Invia di nuovo l\'email di verifica</string>
+    <string name="auth_verification_sent_message">Se l\'account esiste ed è in attesa di verifica, è stata inviata una nuova email di verifica.</string>
+    <string name="auth_verification_success_title">Email verificata</string>
+    <string name="auth_verification_success_subtitle">Il tuo indirizzo email è stato verificato. Ora puoi accedere.</string>
+    <string name="auth_continue_to_login">Vai al login</string>
+
+    <string name="auth_forgot_title">Password dimenticata</string>
+    <string name="auth_forgot_subtitle">Inserisci l\'email del tuo account per richiedere un codice di reimpostazione.</string>
+    <string name="auth_request_reset_button">Richiedi reset password</string>
+    <string name="auth_reset_sent_message">Se esiste un account associato a questa email, abbiamo inviato le istruzioni.</string>
+    <string name="auth_have_reset_code">Ho già un codice di reimpostazione</string>
+
+    <string name="auth_reset_title">Reimposta password</string>
+    <string name="auth_reset_subtitle">Inserisci il codice ricevuto via email e scegli una nuova password.</string>
+    <string name="auth_reset_token_label">Codice di reimpostazione</string>
+    <string name="auth_reset_token_hint">Inserisci codice</string>
+    <string name="auth_new_password_label">Nuova password</string>
+    <string name="auth_reset_button">Reimposta password</string>
+    <string name="auth_reset_success_message">Password reimpostata. Accedi con la tua nuova password.</string>
+
+    <!-- Profile, Preferences, Privacy, Export, Delete Account -->
+    <string name="profile_title">Profilo</string>
+    <string name="profile_name_label">Nome</string>
+    <string name="profile_email_label">Email</string>
+    <string name="profile_verified_badge">Verificata</string>
+    <string name="profile_unverified_badge">Non verificata</string>
+    <string name="profile_section_account">Account</string>
+    <string name="profile_edit_profile">Modifica profilo</string>
+    <string name="profile_change_password">Cambia password</string>
+    <string name="profile_section_preferences">Preferenze</string>
+    <string name="profile_preferences">Preferenze</string>
+    <string name="profile_preferences_subtitle">Aspetto del tema e valuta visualizzata</string>
+    <string name="profile_section_privacy">Privacy e Sicurezza</string>
+    <string name="profile_privacy">Privacy</string>
+    <string name="profile_privacy_subtitle">Categorie di dati archiviati e gestione consensi</string>
+    <string name="profile_export_data">Esporta i miei dati</string>
+    <string name="profile_export_data_subtitle">Scarica una copia dei dati del tuo account</string>
+    <string name="profile_delete_account">Elimina account</string>
+    <string name="profile_delete_account_subtitle">Elimina definitivamente il tuo account e i dati associati</string>
+    <string name="profile_logout">Esci</string>
+    <string name="profile_logout_confirm_title">Uscire dall\'account?</string>
+    <string name="profile_logout_confirm_message">Dovrai effettuare nuovamente l\'accesso per accedere al tuo account.</string>
+
+    <string name="edit_profile_title">Modifica profilo</string>
+    <string name="edit_profile_save">Salva modifiche</string>
+    <string name="edit_profile_saved_message">Profilo aggiornato.</string>
+
+    <string name="change_password_title">Cambia password</string>
+    <string name="change_password_current_label">Password attuale</string>
+    <string name="change_password_new_label">Nuova password</string>
+    <string name="change_password_confirm_label">Conferma nuova password</string>
+    <string name="change_password_submit">Aggiorna password</string>
+    <string name="change_password_success_message">Password aggiornata con successo.</string>
+
+    <string name="preferences_title">Preferenze</string>
+    <string name="preferences_saved_message">Preferenze salvate.</string>
+
+    <string name="privacy_title">Privacy</string>
+    <string name="privacy_your_data_section">I tuoi dati</string>
+    <string name="privacy_consents_section">Consensi</string>
+    <string name="privacy_actions_section">Diritti e azioni sui dati</string>
+    <string name="privacy_consent_required">Obbligatorio</string>
+    <string name="privacy_consent_optional">Opzionale</string>
+    <string name="privacy_consent_updated_message">Preferenza consenso aggiornata.</string>
+    <string name="privacy_policy_updated">Aggiornato il %1$s</string>
+
+    <string name="export_title">Esporta i miei dati</string>
+    <string name="export_description">Richiedi al server la generazione di un\'esportazione dei dati associati al tuo account CashMate.</string>
+    <string name="export_button">Esporta i miei dati</string>
+    <string name="export_generating">Generazione esportazione sul server…</string>
+    <string name="export_ready_title">Esportazione pronta</string>
+    <string name="export_ready_subtitle">File: %1$s (%2$s)</string>
+    <string name="export_share_button">Condividi / Salva file</string>
+    <string name="export_open_button">Apri file</string>
+    <string name="export_file_prepare_error">Impossibile preparare il file scaricato su questo dispositivo.</string>
+
+    <string name="delete_account_title">Elimina account</string>
+    <string name="delete_account_warning_title">Questa azione è permanente</string>
+    <string name="delete_account_warning_message">L\'eliminazione del tuo account CashMate non può essere annullata. Tutta la gestione della cancellazione e della conservazione è eseguita dal backend.</string>
+    <string name="delete_account_consequences_title">Cosa succede quando elimini il tuo account:</string>
+    <string name="delete_account_consequence_1">La tua sessione attiva verrà terminata immediatamente su questo dispositivo.</string>
+    <string name="delete_account_consequence_2">Il tuo profilo, le preferenze e i dati finanziari saranno rimossi secondo le policy del backend.</string>
+    <string name="delete_account_consequence_3">Non potrai più accedere con questo account.</string>
+    <string name="delete_account_confirm_instruction">Digita DELETE qui sotto per confermare l\'eliminazione definitiva.</string>
+    <string name="delete_account_confirm_label">Conferma</string>
+    <string name="delete_account_confirm_hint">DELETE</string>
+    <string name="delete_account_password_label">Password attuale (opzionale)</string>
+    <string name="delete_account_button">Elimina il mio account</string>
+    <string name="delete_account_dialog_title">Confermare eliminazione account</string>
+    <string name="delete_account_dialog_message">Sei sicuro di voler eliminare definitivamente il tuo account CashMate? L\'operazione è irreversibile.</string>
+    <string name="delete_account_acknowledge">Comprendo che l\'eliminazione del mio account è permanente e irreversibile.</string>
 </resources>

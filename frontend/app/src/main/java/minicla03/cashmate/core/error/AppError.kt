@@ -13,8 +13,21 @@ sealed interface AppError {
         data object Forbidden : Network
         data object BadRequest : Network
         data object NotFound : Network
+        data object Conflict : Network
+        data object UnprocessableEntity : Network
+        data object TooManyRequests : Network
         data object ServerError : Network
         data object Unknown : Network
+    }
+
+    sealed interface Auth : AppError {
+        data object InvalidCredentials : Auth
+        data object EmailNotVerified : Auth
+        data object SessionExpired : Auth
+        data object EmailAlreadyExists : Auth
+        data object InvalidVerificationToken : Auth
+        data object InvalidResetToken : Auth
+        data object InvalidCurrentPassword : Auth
     }
 
     sealed interface Receipt : AppError {
@@ -47,7 +60,16 @@ enum class ValidationField {
     ITEM_QUANTITY,
     ITEM_PRICE,
     ADJUSTMENT_DESCRIPTION,
-    ADJUSTMENT_AMOUNT
+    ADJUSTMENT_AMOUNT,
+    EMAIL,
+    NAME,
+    PASSWORD,
+    CONFIRM_PASSWORD,
+    CURRENT_PASSWORD,
+    NEW_PASSWORD,
+    VERIFICATION_TOKEN,
+    RESET_TOKEN,
+    DELETE_CONFIRMATION
 }
 
 enum class ValidationReason {
@@ -56,6 +78,8 @@ enum class ValidationReason {
     MUST_BE_NON_NEGATIVE,
     INVALID_FORMAT,
     TOO_LONG,
+    TOO_SHORT,
+    MISMATCH,
     INVALID_RANGE
 }
 
@@ -63,6 +87,7 @@ enum class BusinessErrorReason {
     CATEGORY_IN_USE,
     CATEGORY_ALREADY_EXISTS,
     CANNOT_DELETE_LAST_CATEGORY,
-    RECEIPT_NOT_READY
+    RECEIPT_NOT_READY,
+    REQUIRED_CONSENT_CANNOT_BE_REVOKED
 }
 

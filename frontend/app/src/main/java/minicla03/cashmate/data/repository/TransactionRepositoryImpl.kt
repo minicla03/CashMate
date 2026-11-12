@@ -8,7 +8,6 @@ import minicla03.cashmate.data.remote.mapper.toDto
 import minicla03.cashmate.data.remote.mapper.toUpdateRequest
 import minicla03.cashmate.domain.model.Receipt
 import minicla03.cashmate.domain.model.Transaction
-import minicla03.cashmate.domain.model.Receipt
 import minicla03.cashmate.domain.model.TransactionFilter
 import minicla03.cashmate.domain.repository.TransactionRepository
 import javax.inject.Inject

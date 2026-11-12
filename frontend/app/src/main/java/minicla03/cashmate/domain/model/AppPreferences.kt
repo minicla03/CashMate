@@ -13,3 +13,5 @@ data class AppPreferences(
     val currency: Currency = Currency.getInstance("EUR")
 )
 
+typealias UserPreferences = AppPreferences
+

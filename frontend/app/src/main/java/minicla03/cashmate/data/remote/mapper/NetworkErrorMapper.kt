@@ -32,9 +32,20 @@ class NetworkErrorMapper @Inject constructor() {
             is CategoryInUseException -> AppError.BusinessRule(BusinessErrorReason.CATEGORY_IN_USE)
             is DuplicateCategoryException -> AppError.BusinessRule(BusinessErrorReason.CATEGORY_ALREADY_EXISTS)
             is LastCategoryDeletionException -> AppError.BusinessRule(BusinessErrorReason.CANNOT_DELETE_LAST_CATEGORY)
+            is RequiredConsentCannotBeRevokedException ->
+                AppError.BusinessRule(BusinessErrorReason.REQUIRED_CONSENT_CANNOT_BE_REVOKED)
             is ReceiptProcessingFailedException -> AppError.Receipt.ProcessingFailed
             is InvalidReceiptException -> AppError.Receipt.InvalidReceipt
             is UnsupportedImageException -> AppError.Receipt.UnsupportedImage
+            is InvalidCredentialsException -> AppError.Auth.InvalidCredentials
+            is EmailNotVerifiedException -> AppError.Auth.EmailNotVerified
+            is SessionExpiredException -> AppError.Auth.SessionExpired
+            is EmailAlreadyExistsException -> AppError.Auth.EmailAlreadyExists
+            is InvalidVerificationTokenException -> AppError.Auth.InvalidVerificationToken
+            is InvalidResetTokenException -> AppError.Auth.InvalidResetToken
+            is InvalidCurrentPasswordException -> AppError.Auth.InvalidCurrentPassword
+            is UnprocessableEntityException -> AppError.Network.UnprocessableEntity
+            is ConflictException -> AppError.Network.Conflict
             else -> AppError.Unknown
         }
     }
@@ -47,6 +58,7 @@ class NetworkErrorMapper @Inject constructor() {
         409 -> AppError.BusinessRule(BusinessErrorReason.CATEGORY_IN_USE)
         415 -> AppError.Receipt.UnsupportedImage
         422 -> AppError.Receipt.InvalidReceipt
+        429 -> AppError.Network.TooManyRequests
         in 500..599 -> AppError.Network.ServerError
         else -> AppError.Network.Unknown
     }
@@ -61,6 +73,9 @@ class DuplicateCategoryException(message: String = "Category already exists") :
 class LastCategoryDeletionException(message: String = "Cannot delete the last category") :
     IllegalStateException(message)
 
+class RequiredConsentCannotBeRevokedException(message: String = "Required consent cannot be revoked") :
+    IllegalStateException(message)
+
 class ReceiptProcessingFailedException(message: String = "Receipt processing failed") :
     IllegalStateException(message)
 
@@ -68,5 +83,32 @@ class InvalidReceiptException(message: String = "Invalid receipt data") :
     IllegalStateException(message)
 
 class UnsupportedImageException(message: String = "Unsupported receipt image") :
+    IllegalStateException(message)
+
+class InvalidCredentialsException(message: String = "Invalid email or password") :
+    IllegalStateException(message)
+
+class EmailNotVerifiedException(message: String = "Email address is not verified") :
+    IllegalStateException(message)
+
+class SessionExpiredException(message: String = "Session has expired") :
+    IllegalStateException(message)
+
+class EmailAlreadyExistsException(message: String = "An account with this email already exists") :
+    IllegalStateException(message)
+
+class InvalidVerificationTokenException(message: String = "Verification token is invalid or expired") :
+    IllegalStateException(message)
+
+class InvalidResetTokenException(message: String = "Reset token is invalid or expired") :
+    IllegalStateException(message)
+
+class InvalidCurrentPasswordException(message: String = "Current password is incorrect") :
+    IllegalStateException(message)
+
+class UnprocessableEntityException(message: String = "Submitted data could not be processed") :
+    IllegalStateException(message)
+
+class ConflictException(message: String = "Resource conflict") :
     IllegalStateException(message)
 

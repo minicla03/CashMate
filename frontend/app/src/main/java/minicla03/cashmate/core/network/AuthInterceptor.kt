@@ -14,6 +14,10 @@ class AuthInterceptor @Inject constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
+        if (originalRequest.header(HEADER_AUTHORIZATION) != null || isPublicAuthPath(originalRequest.url.encodedPath)) {
+            return chain.proceed(originalRequest)
+        }
+
         val token = tokenProvider.getAccessToken()?.takeIf { it.isNotBlank() }
             ?: return chain.proceed(originalRequest)
 
@@ -24,9 +28,20 @@ class AuthInterceptor @Inject constructor(
         return chain.proceed(authenticatedRequest)
     }
 
+    private fun isPublicAuthPath(path: String): Boolean = PUBLIC_AUTH_PATHS.any { path.endsWith(it) }
+
     companion object {
         const val HEADER_AUTHORIZATION = "Authorization"
         private const val BEARER_PREFIX = "Bearer "
+        private val PUBLIC_AUTH_PATHS = setOf(
+            "/${ApiEndpoints.AUTH_LOGIN}",
+            "/${ApiEndpoints.AUTH_REGISTER}",
+            "/${ApiEndpoints.AUTH_REFRESH}",
+            "/${ApiEndpoints.AUTH_VERIFY_EMAIL}",
+            "/${ApiEndpoints.AUTH_RESEND_VERIFICATION}",
+            "/${ApiEndpoints.AUTH_PASSWORD_RESET_REQUEST}",
+            "/${ApiEndpoints.AUTH_PASSWORD_RESET_CONFIRM}"
+        )
     }
 }
 
