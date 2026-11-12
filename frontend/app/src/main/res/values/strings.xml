@@ -1,3 +1,182 @@
 <resources>
-    <string name="app_name">CashMate-frontend</string>
+    <string name="app_name">CashMate</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_transactions">Transactions</string>
+    <string name="nav_statistics">Statistics</string>
+    <string name="nav_settings">Settings</string>
+    <string name="cd_navigate_back">Navigate back</string>
+    <string name="cd_add_transaction">Add transaction</string>
+    <string name="cd_add_category">Add category</string>
+
+    <!-- Common States & Actions -->
+    <string name="action_retry">Retry</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_apply">Apply</string>
+    <string name="action_view_all">View all</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="loading_message">Loading financial data…</string>
+    <string name="error_title">Something went wrong</string>
+
+    <!-- Network & Business Errors -->
+    <string name="error_no_internet">No internet connection. Please check your connection and try again.</string>
+    <string name="error_timeout">The server took too long to respond. Please try again.</string>
+    <string name="error_unauthorized">Your session is not authorized to access this resource.</string>
+    <string name="error_forbidden">You do not have permission to perform this action.</string>
+    <string name="error_not_found">The requested item could not be found.</string>
+    <string name="error_server">Unable to reach the server right now. Please try again later.</string>
+    <string name="error_network_unknown">A network error occurred. Please try again.</string>
+    <string name="error_unknown">An unexpected error occurred. Please try again.</string>
+    <string name="error_category_in_use">This category is used by existing transactions and cannot be deleted.</string>
+    <string name="error_category_duplicate">A category with this name already exists.</string>
+    <string name="error_last_category">At least one category must remain available.</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_amount_positive">Enter an amount greater than zero (up to 2 decimals).</string>
+    <string name="validation_description_required">Description cannot be empty.</string>
+    <string name="validation_description_too_long">Description is too long (max 120 characters).</string>
+    <string name="validation_category_required">Select a category.</string>
+    <string name="validation_account_required">Select an account.</string>
+    <string name="validation_date_invalid">Select a valid date.</string>
+    <string name="validation_date_range_invalid">Start date cannot be after end date.</string>
+    <string name="validation_category_name_required">Category name cannot be empty.</string>
+    <string name="validation_category_name_too_long">Category name is too long (max 40 characters).</string>
+
+    <!-- Transaction Types -->
+    <string name="transaction_type_income">Income</string>
+    <string name="transaction_type_expense">Expense</string>
+    <string name="transaction_type_all">All</string>
+    <string name="cd_income_indicator">Income</string>
+    <string name="cd_expense_indicator">Expense</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_current_balance">Current balance</string>
+    <string name="dashboard_this_month">This month</string>
+    <string name="dashboard_monthly_income">Monthly income</string>
+    <string name="dashboard_monthly_expenses">Monthly expenses</string>
+    <string name="dashboard_monthly_savings">Monthly savings</string>
+    <string name="dashboard_expense_distribution">Expenses by category</string>
+    <string name="dashboard_no_monthly_expenses">No expenses recorded this month yet.</string>
+    <string name="dashboard_recent_transactions">Recent transactions</string>
+    <string name="dashboard_empty_title">No transactions yet</string>
+    <string name="dashboard_empty_subtitle">Add your first income or expense to start tracking your finances.</string>
+    <string name="dashboard_add_first">Add transaction</string>
+
+    <!-- Transactions List -->
+    <string name="transactions_search_hint">Search by description or category</string>
+    <string name="transactions_filter_category_all">All categories</string>
+    <string name="transactions_filter_date_all">All dates</string>
+    <string name="transactions_filter_date_this_month">This month</string>
+    <string name="transactions_filter_date_last_month">Last month</string>
+    <string name="transactions_filter_date_last_30_days">Last 30 days</string>
+    <string name="transactions_filter_date_custom">Custom range</string>
+    <string name="transactions_sort_newest">Newest first</string>
+    <string name="transactions_sort_oldest">Oldest first</string>
+    <string name="transactions_clear_filters">Clear filters</string>
+    <string name="transactions_empty_title">No matching transactions</string>
+    <string name="transactions_empty_subtitle">No transactions were found. Try adjusting your filters or add a new transaction.</string>
+    <plurals name="transactions_count_label">
+        <item quantity="one">%1$d transaction</item>
+        <item quantity="other">%1$d transactions</item>
+    </plurals>
+    <string name="cd_sort_order">Change date sort order</string>
+    <string name="cd_clear_search">Clear search</string>
+
+    <!-- Transaction Detail -->
+    <string name="transaction_detail_title">Transaction details</string>
+    <string name="transaction_detail_type">Type</string>
+    <string name="transaction_detail_category">Category</string>
+    <string name="transaction_detail_date">Date</string>
+    <string name="transaction_detail_account">Account</string>
+    <string name="transaction_delete_dialog_title">Delete transaction?</string>
+    <string name="transaction_delete_dialog_message">This transaction will be permanently removed from your account.</string>
+    <string name="transaction_deleted_message">Transaction deleted.</string>
+
+    <!-- Add / Edit Transaction -->
+    <string name="transaction_form_add_title">Add transaction</string>
+    <string name="transaction_form_edit_title">Edit transaction</string>
+    <string name="transaction_form_type_label">Type</string>
+    <string name="transaction_form_amount_label">Amount</string>
+    <string name="transaction_form_amount_hint">0.00</string>
+    <string name="transaction_form_description_label">Description</string>
+    <string name="transaction_form_description_hint">e.g. Weekly groceries</string>
+    <string name="transaction_form_category_label">Category</string>
+    <string name="transaction_form_category_placeholder">Select category</string>
+    <string name="transaction_form_date_label">Date</string>
+    <string name="transaction_form_account_label">Account</string>
+    <string name="transaction_form_save">Save transaction</string>
+    <string name="transaction_form_update">Update transaction</string>
+    <string name="transaction_saved_message">Transaction saved.</string>
+
+    <!-- Categories -->
+    <string name="categories_title">Categories</string>
+    <string name="categories_add_title">New category</string>
+    <string name="categories_edit_title">Edit category</string>
+    <string name="categories_name_label">Category name</string>
+    <string name="categories_icon_label">Icon</string>
+    <string name="categories_color_label">Color</string>
+    <string name="categories_delete_title">Delete category?</string>
+    <string name="categories_delete_message">Delete \"%1$s\"? Categories with existing transactions cannot be deleted.</string>
+    <string name="categories_empty_title">No categories available</string>
+    <string name="categories_empty_subtitle">Create a category to classify your income and expenses.</string>
+    <string name="category_saved_message">Category saved.</string>
+    <string name="category_deleted_message">Category deleted.</string>
+    <string name="cd_edit_category">Edit category %1$s</string>
+    <string name="cd_delete_category">Delete category %1$s</string>
+
+    <!-- Statistics -->
+    <string name="statistics_month_comparison">Month-over-month expenses</string>
+    <string name="statistics_vs_previous_higher">%1$s more than last month</string>
+    <string name="statistics_vs_previous_lower">%1$s less than last month</string>
+    <string name="statistics_vs_previous_same">Same as last month</string>
+    <string name="statistics_no_previous_baseline">No expenses recorded in the previous month.</string>
+    <string name="statistics_expenses_by_category">Expenses by category</string>
+    <string name="statistics_monthly_trend">Monthly trend (last 6 months)</string>
+    <string name="statistics_total_expenses">Total expenses</string>
+    <string name="statistics_empty_title">Not enough data yet</string>
+    <string name="statistics_empty_subtitle">Add some transactions to unlock category breakdowns and monthly trends.</string>
+
+    <!-- Settings -->
+    <string name="settings_appearance_section">Appearance</string>
+    <string name="settings_theme_label">Theme</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_preferences_section">Preferences</string>
+    <string name="settings_currency_label">Display currency</string>
+    <string name="settings_manage_categories">Manage categories</string>
+    <string name="settings_manage_categories_subtitle">Create, edit, or delete transaction categories</string>
+    <string name="settings_about_section">Application info</string>
+    <string name="settings_version_label">Version</string>
+    <string name="settings_backend_mode_label">Data source mode</string>
+    <string name="settings_backend_mode_mock">Simulated REST client (FakeRemoteDataSource)</string>
+    <string name="settings_architecture_note">Internet-first client. Remote server is the single source of truth.</string>
+
+    <!-- Category Icons & Colors (Accessibility) -->
+    <string name="icon_restaurant">Food</string>
+    <string name="icon_transport">Transport</string>
+    <string name="icon_home">Home</string>
+    <string name="icon_payments">Payments</string>
+    <string name="icon_movie">Entertainment</string>
+    <string name="icon_health">Health</string>
+    <string name="icon_shopping">Shopping</string>
+    <string name="icon_travel">Travel</string>
+    <string name="icon_education">Education</string>
+    <string name="icon_fitness">Fitness</string>
+    <string name="icon_pets">Pets</string>
+    <string name="icon_savings">Savings</string>
+    <string name="icon_work">Work</string>
+    <string name="icon_other">General</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_teal">Teal</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_green">Green</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_red">Red</string>
+    <string name="color_plum">Plum</string>
+    <string name="color_slate">Slate</string>
 </resources>

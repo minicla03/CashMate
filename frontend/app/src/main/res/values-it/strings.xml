@@ -1,0 +1,182 @@
+<resources>
+    <string name="app_name">CashMate</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_transactions">Transazioni</string>
+    <string name="nav_statistics">Statistiche</string>
+    <string name="nav_settings">Impostazioni</string>
+    <string name="cd_navigate_back">Torna indietro</string>
+    <string name="cd_add_transaction">Aggiungi transazione</string>
+    <string name="cd_add_category">Aggiungi categoria</string>
+
+    <!-- Common States & Actions -->
+    <string name="action_retry">Riprova</string>
+    <string name="action_save">Salva</string>
+    <string name="action_cancel">Annulla</string>
+    <string name="action_delete">Elimina</string>
+    <string name="action_edit">Modifica</string>
+    <string name="action_apply">Applica</string>
+    <string name="action_view_all">Vedi tutte</string>
+    <string name="action_refresh">Aggiorna</string>
+    <string name="loading_message">Caricamento dati finanziari…</string>
+    <string name="error_title">Si è verificato un problema</string>
+
+    <!-- Network & Business Errors -->
+    <string name="error_no_internet">Nessuna connessione Internet. Controlla la rete e riprova.</string>
+    <string name="error_timeout">Il server ha impiegato troppo tempo a rispondere. Riprova.</string>
+    <string name="error_unauthorized">Accesso non autorizzato per questa risorsa.</string>
+    <string name="error_forbidden">Non hai i permessi per eseguire questa operazione.</string>
+    <string name="error_not_found">L\'elemento richiesto non è stato trovato.</string>
+    <string name="error_server">Impossibile raggiungere il server al momento. Riprova più tardi.</string>
+    <string name="error_network_unknown">Errore di rete. Riprova.</string>
+    <string name="error_unknown">Errore imprevisto. Riprova.</string>
+    <string name="error_category_in_use">Questa categoria è associata a transazioni esistenti e non può essere eliminata.</string>
+    <string name="error_category_duplicate">Esiste già una categoria con questo nome.</string>
+    <string name="error_last_category">Deve rimanere disponibile almeno una categoria.</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_amount_positive">Inserisci un importo maggiore di zero (massimo 2 decimali).</string>
+    <string name="validation_description_required">La descrizione non può essere vuota.</string>
+    <string name="validation_description_too_long">La descrizione è troppo lunga (massimo 120 caratteri).</string>
+    <string name="validation_category_required">Seleziona una categoria.</string>
+    <string name="validation_account_required">Seleziona un conto.</string>
+    <string name="validation_date_invalid">Seleziona una data valida.</string>
+    <string name="validation_date_range_invalid">La data iniziale non può essere successiva a quella finale.</string>
+    <string name="validation_category_name_required">Il nome della categoria non può essere vuoto.</string>
+    <string name="validation_category_name_too_long">Il nome è troppo lungo (massimo 40 caratteri).</string>
+
+    <!-- Transaction Types -->
+    <string name="transaction_type_income">Entrata</string>
+    <string name="transaction_type_expense">Uscita</string>
+    <string name="transaction_type_all">Tutte</string>
+    <string name="cd_income_indicator">Entrata</string>
+    <string name="cd_expense_indicator">Uscita</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_current_balance">Saldo attuale</string>
+    <string name="dashboard_this_month">Questo mese</string>
+    <string name="dashboard_monthly_income">Entrate del mese</string>
+    <string name="dashboard_monthly_expenses">Spese del mese</string>
+    <string name="dashboard_monthly_savings">Risparmio del mese</string>
+    <string name="dashboard_expense_distribution">Spese per categoria</string>
+    <string name="dashboard_no_monthly_expenses">Nessuna spesa registrata in questo mese.</string>
+    <string name="dashboard_recent_transactions">Transazioni recenti</string>
+    <string name="dashboard_empty_title">Nessuna transazione</string>
+    <string name="dashboard_empty_subtitle">Aggiungi la tua prima entrata o spesa per iniziare a monitorare le tue finanze.</string>
+    <string name="dashboard_add_first">Aggiungi transazione</string>
+
+    <!-- Transactions List -->
+    <string name="transactions_search_hint">Cerca per descrizione o categoria</string>
+    <string name="transactions_filter_category_all">Tutte le categorie</string>
+    <string name="transactions_filter_date_all">Tutte le date</string>
+    <string name="transactions_filter_date_this_month">Questo mese</string>
+    <string name="transactions_filter_date_last_month">Mese scorso</string>
+    <string name="transactions_filter_date_last_30_days">Ultimi 30 giorni</string>
+    <string name="transactions_filter_date_custom">Intervallo personalizzato</string>
+    <string name="transactions_sort_newest">Più recenti</string>
+    <string name="transactions_sort_oldest">Meno recenti</string>
+    <string name="transactions_clear_filters">Azzera filtri</string>
+    <string name="transactions_empty_title">Nessuna transazione trovata</string>
+    <string name="transactions_empty_subtitle">Nessuna transazione corrisponde ai filtri selezionati.</string>
+    <plurals name="transactions_count_label">
+        <item quantity="one">%1$d transazione</item>
+        <item quantity="other">%1$d transazioni</item>
+    </plurals>
+    <string name="cd_sort_order">Cambia ordinamento per data</string>
+    <string name="cd_clear_search">Cancella ricerca</string>
+
+    <!-- Transaction Detail -->
+    <string name="transaction_detail_title">Dettagli transazione</string>
+    <string name="transaction_detail_type">Tipo</string>
+    <string name="transaction_detail_category">Categoria</string>
+    <string name="transaction_detail_date">Data</string>
+    <string name="transaction_detail_account">Conto</string>
+    <string name="transaction_delete_dialog_title">Eliminare la transazione?</string>
+    <string name="transaction_delete_dialog_message">Questa transazione verrà rimossa definitivamente dal tuo conto.</string>
+    <string name="transaction_deleted_message">Transazione eliminata.</string>
+
+    <!-- Add / Edit Transaction -->
+    <string name="transaction_form_add_title">Nuova transazione</string>
+    <string name="transaction_form_edit_title">Modifica transazione</string>
+    <string name="transaction_form_type_label">Tipo</string>
+    <string name="transaction_form_amount_label">Importo</string>
+    <string name="transaction_form_amount_hint">0,00</string>
+    <string name="transaction_form_description_label">Descrizione</string>
+    <string name="transaction_form_description_hint">es. Spesa settimanale</string>
+    <string name="transaction_form_category_label">Categoria</string>
+    <string name="transaction_form_category_placeholder">Seleziona categoria</string>
+    <string name="transaction_form_date_label">Data</string>
+    <string name="transaction_form_account_label">Conto</string>
+    <string name="transaction_form_save">Salva transazione</string>
+    <string name="transaction_form_update">Aggiorna transazione</string>
+    <string name="transaction_saved_message">Transazione salvata.</string>
+
+    <!-- Categories -->
+    <string name="categories_title">Categorie</string>
+    <string name="categories_add_title">Nuova categoria</string>
+    <string name="categories_edit_title">Modifica categoria</string>
+    <string name="categories_name_label">Nome categoria</string>
+    <string name="categories_icon_label">Icona</string>
+    <string name="categories_color_label">Colore</string>
+    <string name="categories_delete_title">Eliminare la categoria?</string>
+    <string name="categories_delete_message">Eliminare \"%1$s\"? Le categorie associate a transazioni esistenti non possono essere eliminate.</string>
+    <string name="categories_empty_title">Nessuna categoria disponibile</string>
+    <string name="categories_empty_subtitle">Crea una categoria per classificare entrate e spese.</string>
+    <string name="category_saved_message">Categoria salvata.</string>
+    <string name="category_deleted_message">Categoria eliminata.</string>
+    <string name="cd_edit_category">Modifica categoria %1$s</string>
+    <string name="cd_delete_category">Elimina categoria %1$s</string>
+
+    <!-- Statistics -->
+    <string name="statistics_month_comparison">Confronto spese mensili</string>
+    <string name="statistics_vs_previous_higher">%1$s in più rispetto al mese scorso</string>
+    <string name="statistics_vs_previous_lower">%1$s in meno rispetto al mese scorso</string>
+    <string name="statistics_vs_previous_same">Invariate rispetto al mese scorso</string>
+    <string name="statistics_no_previous_baseline">Nessuna spesa registrata nel mese precedente.</string>
+    <string name="statistics_expenses_by_category">Spese per categoria</string>
+    <string name="statistics_monthly_trend">Andamento mensile (ultimi 6 mesi)</string>
+    <string name="statistics_total_expenses">Spese totali</string>
+    <string name="statistics_empty_title">Dati insufficienti</string>
+    <string name="statistics_empty_subtitle">Aggiungi alcune transazioni per visualizzare grafici e statistiche mensili.</string>
+
+    <!-- Settings -->
+    <string name="settings_appearance_section">Aspetto</string>
+    <string name="settings_theme_label">Tema</string>
+    <string name="settings_theme_system">Predefinito di sistema</string>
+    <string name="settings_theme_light">Chiaro</string>
+    <string name="settings_theme_dark">Scuro</string>
+    <string name="settings_preferences_section">Preferenze</string>
+    <string name="settings_currency_label">Valuta visualizzata</string>
+    <string name="settings_manage_categories">Gestisci categorie</string>
+    <string name="settings_manage_categories_subtitle">Crea, modifica o elimina le categorie</string>
+    <string name="settings_about_section">Informazioni app</string>
+    <string name="settings_version_label">Versione</string>
+    <string name="settings_backend_mode_label">Modalità sorgente dati</string>
+    <string name="settings_backend_mode_mock">Client REST simulato (FakeRemoteDataSource)</string>
+    <string name="settings_architecture_note">Architettura internet-first. Il server remoto è l\'unica fonte di verità.</string>
+
+    <!-- Category Icons & Colors (Accessibility) -->
+    <string name="icon_restaurant">Cibo</string>
+    <string name="icon_transport">Trasporti</string>
+    <string name="icon_home">Casa</string>
+    <string name="icon_payments">Pagamenti</string>
+    <string name="icon_movie">Intrattenimento</string>
+    <string name="icon_health">Salute</string>
+    <string name="icon_shopping">Acquisti</string>
+    <string name="icon_travel">Viaggi</string>
+    <string name="icon_education">Istruzione</string>
+    <string name="icon_fitness">Sport</string>
+    <string name="icon_pets">Animali</string>
+    <string name="icon_savings">Risparmi</string>
+    <string name="icon_work">Lavoro</string>
+    <string name="icon_other">Altro</string>
+    <string name="color_purple">Viola</string>
+    <string name="color_teal">Verde acqua</string>
+    <string name="color_blue">Blu</string>
+    <string name="color_green">Verde</string>
+    <string name="color_orange">Arancione</string>
+    <string name="color_red">Rosso</string>
+    <string name="color_plum">Prugna</string>
+    <string name="color_slate">Grigio ardesia</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Allow cleartext HTTP to local backend (e.g., 10.0.2.2:8080) in debug builds only. -->
+    <application android:usesCleartextTraffic="true" />
+</manifest>
+
