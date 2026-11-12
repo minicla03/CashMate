@@ -5,8 +5,10 @@ import minicla03.cashmate.data.remote.dto.TransactionDto
 import minicla03.cashmate.data.remote.dto.TransactionFilterDto
 import minicla03.cashmate.data.remote.dto.UpdateTransactionRequest
 import minicla03.cashmate.domain.model.Money
+import minicla03.cashmate.domain.model.Receipt
 import minicla03.cashmate.domain.model.Transaction
 import minicla03.cashmate.domain.model.TransactionFilter
+import minicla03.cashmate.domain.model.TransactionSource
 import minicla03.cashmate.domain.model.TransactionType
 import java.time.Instant
 import java.time.LocalDate
@@ -21,7 +23,10 @@ fun TransactionDto.toDomain(): Transaction = Transaction(
     description = description,
     categoryId = categoryId,
     accountId = accountId,
-    date = parseIsoDate(date)
+    date = parseIsoDate(date),
+    source = TransactionSource.entries.firstOrNull { it.name.equals(source, ignoreCase = true) }
+        ?: TransactionSource.MANUAL,
+    receiptId = receiptId ?: receipt?.id
 )
 
 fun Transaction.toCreateRequest(): CreateTransactionRequest = CreateTransactionRequest(
@@ -33,13 +38,14 @@ fun Transaction.toCreateRequest(): CreateTransactionRequest = CreateTransactionR
     date = date.toString()
 )
 
-fun Transaction.toUpdateRequest(): UpdateTransactionRequest = UpdateTransactionRequest(
+fun Transaction.toUpdateRequest(receipt: Receipt? = null): UpdateTransactionRequest = UpdateTransactionRequest(
     amount = amount.minorUnits,
     type = type.name,
     description = description,
     categoryId = categoryId,
     accountId = accountId,
-    date = date.toString()
+    date = date.toString(),
+    receipt = receipt?.toUpdateRequest()
 )
 
 fun TransactionFilter.toDto(): TransactionFilterDto = TransactionFilterDto(

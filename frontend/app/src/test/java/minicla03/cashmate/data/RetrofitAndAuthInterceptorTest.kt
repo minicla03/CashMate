@@ -6,19 +6,25 @@ import minicla03.cashmate.core.network.TokenProvider
 import minicla03.cashmate.data.remote.api.CashMateApi
 import minicla03.cashmate.data.remote.datasource.RetrofitAccountRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.RetrofitCategoryRemoteDataSource
+import minicla03.cashmate.data.remote.datasource.RetrofitReceiptRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.RetrofitTransactionRemoteDataSource
 import minicla03.cashmate.data.remote.dto.AccountDto
 import minicla03.cashmate.data.remote.dto.CategoryDto
+import minicla03.cashmate.data.remote.dto.ConfirmReceiptRequest
 import minicla03.cashmate.data.remote.dto.CreateCategoryRequest
 import minicla03.cashmate.data.remote.dto.CreateTransactionRequest
 import minicla03.cashmate.data.remote.dto.DashboardDto
 import minicla03.cashmate.data.remote.dto.MonthComparisonDto
+import minicla03.cashmate.data.remote.dto.ReceiptDraftDto
+import minicla03.cashmate.data.remote.dto.ReceiptItemDto
 import minicla03.cashmate.data.remote.dto.StatisticsDto
 import minicla03.cashmate.data.remote.dto.TransactionDto
 import minicla03.cashmate.data.remote.dto.TransactionFilterDto
 import minicla03.cashmate.data.remote.dto.UpdateCategoryRequest
 import minicla03.cashmate.data.remote.dto.UpdateTransactionRequest
+import minicla03.cashmate.domain.model.ReceiptImage
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
@@ -67,7 +73,26 @@ class RetrofitAndAuthInterceptorTest {
             override suspend fun getTransactions(from: String?, to: String?, categoryId: String?, type: String?) =
                 listOf(TransactionDto("t1", 100L, "EXPENSE", "Coffee", "c1", "a1", "2026-11-11"))
             override suspend fun getTransaction(id: String) =
-                TransactionDto(id, 100L, "EXPENSE", "Coffee", "c1", "a1", "2026-11-11")
+                TransactionDto(
+                    id = id,
+                    amount = 200L,
+                    type = "EXPENSE",
+                    description = "Esselunga",
+                    categoryId = "c1",
+                    accountId = "a1",
+                    date = "2026-11-11",
+                    source = "RECEIPT",
+                    receiptId = "r-1",
+                    receipt = ReceiptDraftDto(
+                        id = "r-1",
+                        merchant = "Esselunga",
+                        date = "2026-11-11",
+                        subtotal = 250L,
+                        totalDiscount = 50L,
+                        total = 200L,
+                        items = listOf(ReceiptItemDto("i-1", "Pasta", 1, 250L, 250L, 50L, 200L, "FOOD"))
+                    )
+                )
             override suspend fun createTransaction(request: CreateTransactionRequest) =
                 TransactionDto("t2", request.amount, request.type, request.description, request.categoryId, request.accountId, request.date)
             override suspend fun updateTransaction(id: String, request: UpdateTransactionRequest) =
@@ -87,15 +112,51 @@ class RetrofitAndAuthInterceptorTest {
             override suspend fun getAccounts() = listOf(AccountDto("a1", "Main", "EUR"))
             override suspend fun getDashboard() = DashboardDto(0, 0, 0, 0, emptyList(), emptyList())
             override suspend fun getStatistics() = StatisticsDto(0, 0, emptyList(), emptyList(), MonthComparisonDto("2026-11", "2026-10", 0, 0, 0, null))
+            override suspend fun processReceipt(image: MultipartBody.Part) = ReceiptDraftDto(
+                id = "r-1",
+                merchant = "Esselunga",
+                date = "2026-11-12",
+                subtotal = 250L,
+                totalDiscount = 50L,
+                total = 200L,
+                items = listOf(ReceiptItemDto("i-1", "Pasta", 1, 250L, 250L, 50L, 200L, "FOOD"))
+            )
+            override suspend fun confirmReceipt(id: String, request: ConfirmReceiptRequest) =
+                TransactionDto("tx-from-receipt", request.total, "EXPENSE", request.merchant, request.categoryId, request.accountId, request.date)
         }
 
         val txRemote = RetrofitTransactionRemoteDataSource(stubApi)
         val catRemote = RetrofitCategoryRemoteDataSource(stubApi)
         val accRemote = RetrofitAccountRemoteDataSource(stubApi)
+        val receiptRemote = RetrofitReceiptRemoteDataSource(stubApi)
 
         assertEquals(1, txRemote.getTransactions(TransactionFilterDto()).size)
         assertEquals("c1", catRemote.getCategories().first().id)
         assertEquals("EUR", accRemote.getAccounts().first().currency)
+
+        val draft = receiptRemote.processReceipt(
+            ReceiptImage(bytes = byteArrayOf(1, 2, 3), mimeType = "image/jpeg", fileName = "receipt.jpg")
+        )
+        assertEquals("Esselunga", draft.merchant)
+        val confirmedTx = receiptRemote.confirmReceipt(
+            draft.id,
+            ConfirmReceiptRequest(
+                merchant = draft.merchant,
+                date = draft.date,
+                subtotal = draft.subtotal,
+                totalDiscount = draft.totalDiscount,
+                total = draft.total,
+                categoryId = "cat-food",
+                accountId = "acc-main",
+                items = draft.items,
+                adjustments = draft.adjustments
+            )
+        )
+        assertEquals("tx-from-receipt", confirmedTx.id)
+
+        val fetchedReceipt = receiptRemote.getReceiptForTransaction("tx-from-receipt")
+        assertEquals("Esselunga", fetchedReceipt?.merchant)
+        assertEquals(1, fetchedReceipt?.items?.size)
 
         txRemote.deleteTransaction("t1")
 

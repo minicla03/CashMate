@@ -32,15 +32,21 @@ class NetworkErrorMapper @Inject constructor() {
             is CategoryInUseException -> AppError.BusinessRule(BusinessErrorReason.CATEGORY_IN_USE)
             is DuplicateCategoryException -> AppError.BusinessRule(BusinessErrorReason.CATEGORY_ALREADY_EXISTS)
             is LastCategoryDeletionException -> AppError.BusinessRule(BusinessErrorReason.CANNOT_DELETE_LAST_CATEGORY)
+            is ReceiptProcessingFailedException -> AppError.Receipt.ProcessingFailed
+            is InvalidReceiptException -> AppError.Receipt.InvalidReceipt
+            is UnsupportedImageException -> AppError.Receipt.UnsupportedImage
             else -> AppError.Unknown
         }
     }
 
     private fun mapHttpStatus(code: Int): AppError = when (code) {
+        400 -> AppError.Network.BadRequest
         401 -> AppError.Network.Unauthorized
         403 -> AppError.Network.Forbidden
         404 -> AppError.Network.NotFound
         409 -> AppError.BusinessRule(BusinessErrorReason.CATEGORY_IN_USE)
+        415 -> AppError.Receipt.UnsupportedImage
+        422 -> AppError.Receipt.InvalidReceipt
         in 500..599 -> AppError.Network.ServerError
         else -> AppError.Network.Unknown
     }
@@ -53,5 +59,14 @@ class DuplicateCategoryException(message: String = "Category already exists") :
     IllegalStateException(message)
 
 class LastCategoryDeletionException(message: String = "Cannot delete the last category") :
+    IllegalStateException(message)
+
+class ReceiptProcessingFailedException(message: String = "Receipt processing failed") :
+    IllegalStateException(message)
+
+class InvalidReceiptException(message: String = "Invalid receipt data") :
+    IllegalStateException(message)
+
+class UnsupportedImageException(message: String = "Unsupported receipt image") :
     IllegalStateException(message)
 

@@ -130,6 +130,8 @@ class TransactionsViewModel @Inject constructor(
 
             TransactionsEvent.AddTransactionClick -> sendEffect(TransactionsEffect.NavigateToAddTransaction)
 
+            TransactionsEvent.ScanReceiptClick -> sendEffect(TransactionsEffect.NavigateToScanReceipt)
+
             is TransactionsEvent.TransactionClick -> sendEffect(
                 TransactionsEffect.NavigateToTransactionDetail(event.id)
             )

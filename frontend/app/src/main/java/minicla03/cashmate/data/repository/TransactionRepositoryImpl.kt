@@ -6,7 +6,9 @@ import minicla03.cashmate.data.remote.mapper.toCreateRequest
 import minicla03.cashmate.data.remote.mapper.toDomain
 import minicla03.cashmate.data.remote.mapper.toDto
 import minicla03.cashmate.data.remote.mapper.toUpdateRequest
+import minicla03.cashmate.domain.model.Receipt
 import minicla03.cashmate.domain.model.Transaction
+import minicla03.cashmate.domain.model.Receipt
 import minicla03.cashmate.domain.model.TransactionFilter
 import minicla03.cashmate.domain.repository.TransactionRepository
 import javax.inject.Inject
@@ -36,6 +38,17 @@ class TransactionRepositoryImpl @Inject constructor(
             remoteDataSource.updateTransaction(
                 id = transaction.id,
                 request = transaction.toUpdateRequest()
+            ).toDomain()
+        }
+
+    override suspend fun updateTransactionWithReceipt(
+        transaction: Transaction,
+        receipt: Receipt
+    ): AppResult<Transaction> =
+        safeRemoteCall {
+            remoteDataSource.updateTransaction(
+                id = transaction.id,
+                request = transaction.toUpdateRequest(receipt)
             ).toDomain()
         }
 

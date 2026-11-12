@@ -5,8 +5,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import minicla03.cashmate.data.remote.dto.AccountDto
 import minicla03.cashmate.data.remote.dto.CategoryDto
+import minicla03.cashmate.data.remote.dto.ConfirmReceiptRequest
 import minicla03.cashmate.data.remote.dto.CreateCategoryRequest
 import minicla03.cashmate.data.remote.dto.CreateTransactionRequest
+import minicla03.cashmate.data.remote.dto.ReceiptAdjustmentDto
+import minicla03.cashmate.data.remote.dto.ReceiptDraftDto
+import minicla03.cashmate.data.remote.dto.ReceiptItemDto
 import minicla03.cashmate.data.remote.dto.TransactionDto
 import minicla03.cashmate.data.remote.dto.TransactionFilterDto
 import minicla03.cashmate.data.remote.dto.UpdateCategoryRequest
@@ -14,6 +18,8 @@ import minicla03.cashmate.data.remote.dto.UpdateTransactionRequest
 import minicla03.cashmate.data.remote.mapper.CategoryInUseException
 import minicla03.cashmate.data.remote.mapper.DuplicateCategoryException
 import minicla03.cashmate.data.remote.mapper.LastCategoryDeletionException
+import minicla03.cashmate.data.remote.mapper.UnsupportedImageException
+import minicla03.cashmate.domain.model.ReceiptImage
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
@@ -68,6 +74,8 @@ class FakeRemoteStore @Inject constructor(
         CategoryDto(id = "cat-other", name = "Other", icon = "category", color = "#546E7A")
     )
 
+    private val receiptDrafts = mutableMapOf<String, ReceiptDraftDto>()
+    private val confirmedReceipts = seedConfirmedReceipts(LocalDate.now(clock)).toMutableMap()
     private val transactions: MutableList<TransactionDto> = seedTransactions(LocalDate.now(clock)).toMutableList()
 
     suspend fun getTransactions(filter: TransactionFilterDto?): List<TransactionDto> = executeRemote {
@@ -105,14 +113,84 @@ class FakeRemoteStore @Inject constructor(
         executeRemote {
             val index = transactions.indexOfFirst { it.id == id }
             if (index < 0) throw notFoundException()
-            val updated = TransactionDto(
-                id = id,
-                amount = request.amount,
-                type = request.type,
-                description = request.description,
+            val existing = transactions[index]
+            val receiptPayload = request.receipt
+            if (receiptPayload == null) {
+                val updated = TransactionDto(
+                    id = id,
+                    amount = request.amount,
+                    type = request.type,
+                    description = request.description,
+                    categoryId = request.categoryId,
+                    accountId = request.accountId,
+                    date = request.date,
+                    source = existing.source,
+                    receiptId = existing.receiptId,
+                    receipt = existing.receipt
+                )
+                transactions[index] = updated
+                return@executeRemote updated
+            }
+
+            val normalizedItems = receiptPayload.items.map { item ->
+                val itemId = item.id.ifBlank { "item-${idSequence.incrementAndGet()}" }
+                val gross = item.unitPrice * item.quantity.toLong()
+                val net = (gross - item.discountAmount).coerceAtLeast(0L)
+                item.copy(
+                    id = itemId,
+                    description = item.description.trim(),
+                    grossAmount = gross,
+                    netAmount = net,
+                    category = item.category.trim()
+                )
+            }
+            val normalizedAdjustments = receiptPayload.adjustments.map { adj ->
+                adj.copy(description = adj.description.trim())
+            }
+            val subtotal = normalizedItems.sumOf { it.grossAmount }
+            val itemDiscounts = normalizedItems.sumOf { it.discountAmount }
+            val itemsNet = normalizedItems.sumOf { it.netAmount }
+            val adjDiscounts = normalizedAdjustments
+                .filter { it.type.equals("DISCOUNT", ignoreCase = true) }
+                .sumOf { it.amount }
+            val adjAdditions = normalizedAdjustments
+                .filter {
+                    it.type.equals("SURCHARGE", ignoreCase = true) ||
+                        it.type.equals("TAX", ignoreCase = true)
+                }
+                .sumOf { it.amount }
+            val totalDiscount = itemDiscounts + adjDiscounts
+            val total = if (normalizedItems.isNotEmpty()) {
+                (itemsNet - adjDiscounts + adjAdditions).coerceAtLeast(0L)
+            } else {
+                request.amount
+            }
+            val resolvedReceiptId = existing.receiptId ?: receiptPayload.id
+            val updatedReceipt = ReceiptDraftDto(
+                id = resolvedReceiptId,
+                merchant = request.description.trim().ifBlank { receiptPayload.merchant.trim() },
+                date = request.date,
+                subtotal = subtotal,
+                totalDiscount = totalDiscount,
+                total = total,
                 categoryId = request.categoryId,
                 accountId = request.accountId,
-                date = request.date
+                items = normalizedItems,
+                adjustments = normalizedAdjustments
+            )
+            confirmedReceipts[resolvedReceiptId] = updatedReceipt
+
+            val updated = TransactionDto(
+                id = id,
+                amount = total,
+                type = request.type,
+                description = request.description.trim(),
+                categoryId = request.categoryId,
+                accountId = request.accountId,
+                date = request.date,
+                source = existing.source,
+                receiptId = resolvedReceiptId,
+                receipt = updatedReceipt
             )
             transactions[index] = updated
             updated
@@ -120,8 +198,9 @@ class FakeRemoteStore @Inject constructor(
 
     suspend fun deleteTransaction(id: String) {
         executeRemote {
-            val removed = transactions.removeAll { it.id == id }
-            if (!removed) throw notFoundException()
+            val existing = transactions.firstOrNull { it.id == id } ?: throw notFoundException()
+            transactions.removeAll { it.id == id }
+            existing.receiptId?.let { confirmedReceipts.remove(it) }
         }
     }
 
@@ -173,6 +252,127 @@ class FakeRemoteStore @Inject constructor(
         accounts.toList()
     }
 
+    suspend fun processReceipt(image: ReceiptImage): ReceiptDraftDto = executeRemote {
+        if (image.bytes.isEmpty() || !image.mimeType.startsWith("image/", ignoreCase = true)) {
+            throw UnsupportedImageException()
+        }
+        val draftId = "receipt-${idSequence.incrementAndGet()}"
+        val today = LocalDate.now(clock).toString()
+        val draft = ReceiptDraftDto(
+            id = draftId,
+            merchant = "Esselunga",
+            date = today,
+            subtotal = 2_380L,
+            totalDiscount = 500L,
+            total = 1_880L,
+            categoryId = "cat-food",
+            accountId = DEFAULT_ACCOUNT_ID,
+            items = listOf(
+                ReceiptItemDto(
+                    id = "item-1",
+                    description = "Pasta di Semola 500g",
+                    quantity = 2,
+                    unitPrice = 125L,
+                    grossAmount = 250L,
+                    discountAmount = 50L,
+                    netAmount = 200L,
+                    category = "FOOD"
+                ),
+                ReceiptItemDto(
+                    id = "item-2",
+                    description = "Latte Fresco Intero 1L",
+                    quantity = 2,
+                    unitPrice = 180L,
+                    grossAmount = 360L,
+                    discountAmount = 0L,
+                    netAmount = 360L,
+                    category = "FOOD"
+                ),
+                ReceiptItemDto(
+                    id = "item-3",
+                    description = "Olio Extra Vergine 1L",
+                    quantity = 1,
+                    unitPrice = 990L,
+                    grossAmount = 990L,
+                    discountAmount = 200L,
+                    netAmount = 790L,
+                    category = "FOOD"
+                ),
+                ReceiptItemDto(
+                    id = "item-4",
+                    description = "Detersivo Piatti Eco",
+                    quantity = 1,
+                    unitPrice = 340L,
+                    grossAmount = 340L,
+                    discountAmount = 0L,
+                    netAmount = 340L,
+                    category = "SHOPPING"
+                ),
+                ReceiptItemDto(
+                    id = "item-5",
+                    description = "Biglietto Trasporto Urbano",
+                    quantity = 2,
+                    unitPrice = 220L,
+                    grossAmount = 440L,
+                    discountAmount = 0L,
+                    netAmount = 440L,
+                    category = "TRANSPORT"
+                )
+            ),
+            adjustments = listOf(
+                ReceiptAdjustmentDto(
+                    id = "adj-1",
+                    description = "Carta Fidaty - Buono Sconto",
+                    amount = 250L,
+                    type = "DISCOUNT"
+                )
+            )
+        )
+        receiptDrafts[draftId] = draft
+        draft
+    }
+
+    suspend fun confirmReceipt(id: String, request: ConfirmReceiptRequest): TransactionDto =
+        executeRemote {
+            if (!receiptDrafts.containsKey(id)) {
+                throw notFoundException()
+            }
+            receiptDrafts.remove(id)
+            val confirmedReceipt = ReceiptDraftDto(
+                id = id,
+                merchant = request.merchant.trim(),
+                date = request.date,
+                subtotal = request.subtotal,
+                totalDiscount = request.totalDiscount,
+                total = request.total,
+                categoryId = request.categoryId,
+                accountId = request.accountId,
+                items = request.items,
+                adjustments = request.adjustments
+            )
+            confirmedReceipts[id] = confirmedReceipt
+            val created = TransactionDto(
+                id = "tx-${idSequence.incrementAndGet()}",
+                amount = request.total,
+                type = "EXPENSE",
+                description = request.merchant.trim(),
+                categoryId = request.categoryId,
+                accountId = request.accountId,
+                date = request.date,
+                source = "RECEIPT",
+                receiptId = id,
+                receipt = confirmedReceipt
+            )
+            transactions.add(created)
+            created
+        }
+
+    suspend fun getReceiptForTransaction(transactionId: String): ReceiptDraftDto? = executeRemote {
+        val tx = transactions.firstOrNull { it.id == transactionId } ?: throw notFoundException()
+        val receiptId = tx.receiptId ?: return@executeRemote tx.receipt
+        confirmedReceipts[receiptId] ?: tx.receipt
+    }
+
     private suspend fun <T> executeRemote(block: () -> T): T {
         val delayMs = config.simulatedDelayMs
         if (delayMs > 0L) {
@@ -204,7 +404,17 @@ class FakeRemoteStore @Inject constructor(
             TransactionDto("tx-104", 4_900L, "EXPENSE", "Metro & Train Pass", "cat-transport", DEFAULT_ACCOUNT_ID, currentMonthDay(6)),
             TransactionDto("tx-105", 3_850L, "EXPENSE", "Cinema & Dinner", "cat-entertainment", DEFAULT_ACCOUNT_ID, currentMonthDay(8)),
             TransactionDto("tx-106", 2_490L, "EXPENSE", "Pharmacy", "cat-health", DEFAULT_ACCOUNT_ID, currentMonthDay(9)),
-            TransactionDto("tx-107", 6_480L, "EXPENSE", "Organic Market", "cat-food", DEFAULT_ACCOUNT_ID, currentMonthDay(11)),
+            TransactionDto(
+                id = "tx-107",
+                amount = 6_480L,
+                type = "EXPENSE",
+                description = "Organic Market",
+                categoryId = "cat-food",
+                accountId = DEFAULT_ACCOUNT_ID,
+                date = currentMonthDay(11),
+                source = "RECEIPT",
+                receiptId = SEEDED_RECEIPT_ID
+            ),
             TransactionDto("tx-108", 1_850L, "EXPENSE", "Specialty Coffee & Bakery", "cat-food", DEFAULT_ACCOUNT_ID, currentMonthDay(12)),
 
             // 1 month ago
@@ -242,8 +452,95 @@ class FakeRemoteStore @Inject constructor(
         )
     }
 
+    private fun seedConfirmedReceipts(today: LocalDate): Map<String, ReceiptDraftDto> {
+        val currentMonth = YearMonth.from(today)
+        val seededDate = currentMonth.atDay(11.coerceIn(1, today.dayOfMonth)).toString()
+        val seededReceipt = ReceiptDraftDto(
+            id = SEEDED_RECEIPT_ID,
+            merchant = "Organic Market",
+            date = seededDate,
+            subtotal = 7_580L,
+            totalDiscount = 1_100L,
+            total = 6_480L,
+            categoryId = "cat-food",
+            accountId = DEFAULT_ACCOUNT_ID,
+            items = listOf(
+                ReceiptItemDto(
+                    id = "seed-item-1",
+                    description = "Pasta Barilla Integrale 500g",
+                    quantity = 2,
+                    unitPrice = 250L,
+                    grossAmount = 500L,
+                    discountAmount = 100L,
+                    netAmount = 400L,
+                    category = "FOOD"
+                ),
+                ReceiptItemDto(
+                    id = "seed-item-2",
+                    description = "Latte Fresco Bio 1L",
+                    quantity = 3,
+                    unitPrice = 190L,
+                    grossAmount = 570L,
+                    discountAmount = 0L,
+                    netAmount = 570L,
+                    category = "FOOD"
+                ),
+                ReceiptItemDto(
+                    id = "seed-item-3",
+                    description = "Olio Extra Vergine DOP 1L",
+                    quantity = 1,
+                    unitPrice = 1_490L,
+                    grossAmount = 1_490L,
+                    discountAmount = 300L,
+                    netAmount = 1_190L,
+                    category = "FOOD"
+                ),
+                ReceiptItemDto(
+                    id = "seed-item-4",
+                    description = "Filetto di Salmone Fresco",
+                    quantity = 2,
+                    unitPrice = 1_250L,
+                    grossAmount = 2_500L,
+                    discountAmount = 0L,
+                    netAmount = 2_500L,
+                    category = "FOOD"
+                ),
+                ReceiptItemDto(
+                    id = "seed-item-5",
+                    description = "Detersivo Lavatrice Eco",
+                    quantity = 1,
+                    unitPrice = 890L,
+                    grossAmount = 890L,
+                    discountAmount = 190L,
+                    netAmount = 700L,
+                    category = "SHOPPING"
+                ),
+                ReceiptItemDto(
+                    id = "seed-item-6",
+                    description = "Frutta e Verdura di Stagione",
+                    quantity = 1,
+                    unitPrice = 1_630L,
+                    grossAmount = 1_630L,
+                    discountAmount = 0L,
+                    netAmount = 1_630L,
+                    category = "FOOD"
+                )
+            ),
+            adjustments = listOf(
+                ReceiptAdjustmentDto(
+                    id = "seed-adj-1",
+                    description = "Member Weekend Discount",
+                    amount = 510L,
+                    type = "DISCOUNT"
+                )
+            )
+        )
+        return mapOf(SEEDED_RECEIPT_ID to seededReceipt)
+    }
+
     companion object {
         const val DEFAULT_ACCOUNT_ID = "acc-main"
+        const val SEEDED_RECEIPT_ID = "receipt-seed-107"
     }
 }
 

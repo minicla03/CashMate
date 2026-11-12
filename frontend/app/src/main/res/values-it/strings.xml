@@ -27,6 +27,7 @@
     <string name="error_timeout">Il server ha impiegato troppo tempo a rispondere. Riprova.</string>
     <string name="error_unauthorized">Accesso non autorizzato per questa risorsa.</string>
     <string name="error_forbidden">Non hai i permessi per eseguire questa operazione.</string>
+    <string name="error_bad_request">I dati inviati non sono validi. Controlla i campi e riprova.</string>
     <string name="error_not_found">L\'elemento richiesto non è stato trovato.</string>
     <string name="error_server">Impossibile raggiungere il server al momento. Riprova più tardi.</string>
     <string name="error_network_unknown">Errore di rete. Riprova.</string>
@@ -34,6 +35,11 @@
     <string name="error_category_in_use">Questa categoria è associata a transazioni esistenti e non può essere eliminata.</string>
     <string name="error_category_duplicate">Esiste già una categoria con questo nome.</string>
     <string name="error_last_category">Deve rimanere disponibile almeno una categoria.</string>
+    <string name="error_receipt_processing_failed">Non siamo riusciti ad analizzare questo scontrino al momento. Riprova.</string>
+    <string name="error_receipt_invalid">I dati dello scontrino sembrano incompleti o non validi. Prova con un\'altra foto.</string>
+    <string name="error_receipt_unsupported_image">Seleziona un file immagine valido (JPEG o PNG).</string>
+    <string name="error_receipt_not_ready">La bozza dello scontrino non è più disponibile. Scansiona di nuovo lo scontrino.</string>
+    <string name="error_camera_permission_denied">Il permesso fotocamera serve per scattare una foto. Puoi comunque scegliere un\'immagine dalla galleria.</string>
 
     <!-- Validation Messages -->
     <string name="validation_amount_positive">Inserisci un importo maggiore di zero (massimo 2 decimali).</string>
@@ -45,6 +51,14 @@
     <string name="validation_date_range_invalid">La data iniziale non può essere successiva a quella finale.</string>
     <string name="validation_category_name_required">Il nome della categoria non può essere vuoto.</string>
     <string name="validation_category_name_too_long">Il nome è troppo lungo (massimo 40 caratteri).</string>
+    <string name="validation_merchant_required">Il nome dell\'esercente non può essere vuoto.</string>
+    <string name="validation_merchant_too_long">Il nome dell\'esercente è troppo lungo (massimo 120 caratteri).</string>
+    <string name="validation_receipt_total_positive">Inserisci un totale valido maggiore di zero.</string>
+    <string name="validation_receipt_item_description_required">Ogni prodotto deve avere una descrizione.</string>
+    <string name="validation_receipt_item_quantity_positive">La quantità del prodotto deve essere almeno 1.</string>
+    <string name="validation_receipt_item_price_non_negative">Gli importi del prodotto devono essere maggiori o uguali a zero.</string>
+    <string name="validation_receipt_adjustment_description_required">Ogni rettifica deve avere una descrizione.</string>
+    <string name="validation_receipt_adjustment_amount_non_negative">L\'importo della rettifica deve essere maggiore o uguale a zero.</string>
 
     <!-- Transaction Types -->
     <string name="transaction_type_income">Entrata</string>
@@ -92,6 +106,9 @@
     <string name="transaction_detail_category">Categoria</string>
     <string name="transaction_detail_date">Data</string>
     <string name="transaction_detail_account">Conto</string>
+    <string name="transaction_detail_receipt_section">Dettagli scontrino</string>
+    <string name="transaction_detail_receipt_merchant">Esercente: %1$s</string>
+    <string name="transaction_detail_receipt_unavailable">Dettagli scontrino non disponibili.</string>
     <string name="transaction_delete_dialog_title">Eliminare la transazione?</string>
     <string name="transaction_delete_dialog_message">Questa transazione verrà rimossa definitivamente dal tuo conto.</string>
     <string name="transaction_deleted_message">Transazione eliminata.</string>
@@ -179,4 +196,74 @@
     <string name="color_red">Rosso</string>
     <string name="color_plum">Prugna</string>
     <string name="color_slate">Grigio ardesia</string>
+
+    <!-- Receipt Scanning & Review -->
+    <string name="receipt_scan_action">Scansiona scontrino</string>
+    <string name="receipt_scan_title">Scansiona scontrino</string>
+    <string name="receipt_scan_heading">Scatta o scegli uno scontrino</string>
+    <string name="receipt_scan_subtitle">Scatta una foto dello scontrino o scegline una dalla galleria. Potrai verificare e confermare tutti i dettagli prima del salvataggio.</string>
+    <string name="receipt_scan_take_photo">Scatta foto</string>
+    <string name="receipt_scan_pick_gallery">Scegli dalla galleria</string>
+    <string name="receipt_scan_choose_another">Scegli un\'altra immagine</string>
+    <string name="receipt_uploading_title">Caricamento scontrino…</string>
+    <string name="receipt_uploading_subtitle">Invio sicuro dell\'immagine dello scontrino.</string>
+    <string name="receipt_processing_title">Analisi scontrino in corso…</string>
+    <string name="receipt_processing_subtitle">Lettura dello scontrino e identificazione di prodotti e sconti.</string>
+    <string name="receipt_review_title">Verifica scontrino</string>
+    <string name="receipt_review_found_banner">Ecco cosa abbiamo trovato — controlla e modifica tutto prima di confermare.</string>
+    <string name="receipt_review_merchant_label">Esercente</string>
+    <string name="receipt_review_merchant_hint">es. Esselunga</string>
+    <string name="receipt_review_date_label">Data</string>
+    <string name="receipt_review_total_label">Totale</string>
+    <string name="receipt_review_subtotal_label">Subtotale</string>
+    <string name="receipt_review_total_discount_label">Sconto totale</string>
+    <string name="receipt_review_products_section">Prodotti</string>
+    <string name="receipt_review_add_item">Aggiungi prodotto</string>
+    <string name="receipt_review_empty_items">Nessun prodotto elencato. Puoi comunque aggiungere prodotti o confermare il totale.</string>
+    <string name="receipt_review_item_description">Descrizione prodotto</string>
+    <string name="receipt_review_item_quantity">Qtà</string>
+    <string name="receipt_review_item_unit_price">Prezzo unitario</string>
+    <string name="receipt_review_item_gross">Lordo</string>
+    <string name="receipt_review_item_discount">Sconto</string>
+    <string name="receipt_review_item_net">Netto</string>
+    <string name="receipt_review_item_category">Categoria prodotto</string>
+    <string name="receipt_review_adjustments_section">Sconti e rettifiche</string>
+    <string name="receipt_review_add_adjustment">Aggiungi rettifica</string>
+    <string name="receipt_review_adjustment_description">Descrizione</string>
+    <string name="receipt_review_adjustment_amount">Importo</string>
+    <string name="receipt_review_adjustment_type_discount">Sconto</string>
+    <string name="receipt_review_adjustment_type_surcharge">Maggiorazione</string>
+    <string name="receipt_review_adjustment_type_tax">Imposta</string>
+    <string name="receipt_review_adjustment_type_other">Altro</string>
+    <string name="receipt_review_totals_section">Riepilogo</string>
+    <string name="receipt_review_confirm">Conferma</string>
+    <string name="receipt_review_discard_title">Scartare lo scontrino scansionato?</string>
+    <string name="receipt_review_discard_message">Hai modifiche non salvate. Annullando perderai i dati senza creare alcuna transazione.</string>
+    <string name="receipt_review_discard_confirm">Scarta</string>
+    <string name="receipt_confirmed_title">Scontrino confermato</string>
+    <string name="receipt_confirmed_subtitle">Transazione aggiunta con successo.</string>
+    <string name="receipt_confirmed_view_transaction">Vedi transazione</string>
+    <string name="receipt_confirmed_done">Fine</string>
+    <string name="cd_edit_receipt_item">Modifica prodotto %1$s</string>
+    <string name="cd_remove_receipt_item">Rimuovi prodotto %1$s</string>
+    <string name="cd_remove_receipt_adjustment">Rimuovi rettifica %1$s</string>
+    <string name="receipt_review_total_paid_label">Totale pagato</string>
+    <string name="receipt_review_transaction_amount_hint">Questo importo verrà registrato come transazione.</string>
+    <string name="receipt_review_item_original_price">Originale</string>
+    <string name="receipt_review_item_paid">Pagato</string>
+    <string name="receipt_review_savings_title">Hai risparmiato</string>
+    <string name="receipt_review_original_value">Valore originale</string>
+    <string name="receipt_review_savings_label">Risparmio</string>
+    <string name="receipt_review_you_paid">Hai pagato</string>
+    <string name="receipt_review_discounts_summary">Sconti</string>
+    <string name="receipt_review_edit_totals">Modifica totali</string>
+    <string name="receipt_review_done_editing_totals">Fine</string>
+    <string name="permission_camera_rationale_title">Accesso alla fotocamera necessario</string>
+    <string name="permission_camera_rationale_message">Consenti l\'accesso alla fotocamera per fotografare il tuo scontrino.</string>
+    <string name="permission_camera_permanently_denied_message">Il permesso fotocamera è disattivato. Apri le impostazioni dell\'app per abilitarlo oppure scegli un\'immagine dalla galleria.</string>
+    <string name="permission_gallery_rationale_title">Accesso alle foto necessario</string>
+    <string name="permission_gallery_rationale_message">Consenti l\'accesso alle foto per selezionare uno scontrino dalla tua galleria.</string>
+    <string name="permission_gallery_permanently_denied_message">L\'accesso alle foto è disattivato. Apri le impostazioni dell\'app per abilitarlo oppure scatta una nuova foto.</string>
+    <string name="permission_action_open_settings">Apri impostazioni</string>
+    <string name="permission_action_grant">Consenti accesso</string>
 </resources>

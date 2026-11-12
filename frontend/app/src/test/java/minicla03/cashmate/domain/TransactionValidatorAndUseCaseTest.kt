@@ -8,6 +8,7 @@ import minicla03.cashmate.core.error.ValidationReason
 import minicla03.cashmate.domain.model.Account
 import minicla03.cashmate.domain.model.Category
 import minicla03.cashmate.domain.model.Money
+import minicla03.cashmate.domain.model.Receipt
 import minicla03.cashmate.domain.model.Transaction
 import minicla03.cashmate.domain.model.TransactionFilter
 import minicla03.cashmate.domain.model.TransactionType
@@ -174,6 +175,10 @@ class TransactionValidatorAndUseCaseTest {
             AppResult.Success(transaction)
         override suspend fun updateTransaction(transaction: Transaction): AppResult<Transaction> =
             AppResult.Success(transaction)
+        override suspend fun updateTransactionWithReceipt(
+            transaction: Transaction,
+            receipt: Receipt
+        ): AppResult<Transaction> = AppResult.Success(transaction)
         override suspend fun deleteTransaction(id: String): AppResult<Unit> =
             AppResult.Success(Unit)
     }

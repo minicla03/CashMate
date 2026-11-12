@@ -27,6 +27,7 @@
     <string name="error_timeout">The server took too long to respond. Please try again.</string>
     <string name="error_unauthorized">Your session is not authorized to access this resource.</string>
     <string name="error_forbidden">You do not have permission to perform this action.</string>
+    <string name="error_bad_request">The submitted data is invalid. Please check your entries and try again.</string>
     <string name="error_not_found">The requested item could not be found.</string>
     <string name="error_server">Unable to reach the server right now. Please try again later.</string>
     <string name="error_network_unknown">A network error occurred. Please try again.</string>
@@ -34,6 +35,11 @@
     <string name="error_category_in_use">This category is used by existing transactions and cannot be deleted.</string>
     <string name="error_category_duplicate">A category with this name already exists.</string>
     <string name="error_last_category">At least one category must remain available.</string>
+    <string name="error_receipt_processing_failed">We could not analyze this receipt right now. Please try again.</string>
+    <string name="error_receipt_invalid">The receipt data appears incomplete or invalid. Please try another photo.</string>
+    <string name="error_receipt_unsupported_image">Please select a valid image file (JPEG or PNG).</string>
+    <string name="error_receipt_not_ready">The receipt draft is no longer available. Please scan it again.</string>
+    <string name="error_camera_permission_denied">Camera permission is needed to take a photo. You can still choose an image from your gallery.</string>
 
     <!-- Validation Messages -->
     <string name="validation_amount_positive">Enter an amount greater than zero (up to 2 decimals).</string>
@@ -45,6 +51,14 @@
     <string name="validation_date_range_invalid">Start date cannot be after end date.</string>
     <string name="validation_category_name_required">Category name cannot be empty.</string>
     <string name="validation_category_name_too_long">Category name is too long (max 40 characters).</string>
+    <string name="validation_merchant_required">Merchant name cannot be empty.</string>
+    <string name="validation_merchant_too_long">Merchant name is too long (max 120 characters).</string>
+    <string name="validation_receipt_total_positive">Enter a valid total greater than zero.</string>
+    <string name="validation_receipt_item_description_required">Each item must have a description.</string>
+    <string name="validation_receipt_item_quantity_positive">Item quantity must be at least 1.</string>
+    <string name="validation_receipt_item_price_non_negative">Item amounts must be zero or greater.</string>
+    <string name="validation_receipt_adjustment_description_required">Each adjustment must have a description.</string>
+    <string name="validation_receipt_adjustment_amount_non_negative">Adjustment amount must be zero or greater.</string>
 
     <!-- Transaction Types -->
     <string name="transaction_type_income">Income</string>
@@ -92,6 +106,9 @@
     <string name="transaction_detail_category">Category</string>
     <string name="transaction_detail_date">Date</string>
     <string name="transaction_detail_account">Account</string>
+    <string name="transaction_detail_receipt_section">Receipt details</string>
+    <string name="transaction_detail_receipt_merchant">Merchant: %1$s</string>
+    <string name="transaction_detail_receipt_unavailable">Receipt details unavailable.</string>
     <string name="transaction_delete_dialog_title">Delete transaction?</string>
     <string name="transaction_delete_dialog_message">This transaction will be permanently removed from your account.</string>
     <string name="transaction_deleted_message">Transaction deleted.</string>
@@ -179,4 +196,85 @@
     <string name="color_red">Red</string>
     <string name="color_plum">Plum</string>
     <string name="color_slate">Slate</string>
+
+    <!-- Receipt Scanning & Review -->
+    <string name="receipt_scan_action">Scan receipt</string>
+    <string name="receipt_scan_title">Scan receipt</string>
+    <string name="receipt_scan_heading">Capture or choose a receipt</string>
+    <string name="receipt_scan_subtitle">Take a photo of your receipt or select one from your gallery. You will review and confirm all details before saving.</string>
+    <string name="receipt_scan_take_photo">Take photo</string>
+    <string name="receipt_scan_pick_gallery">Choose from gallery</string>
+    <string name="receipt_scan_choose_another">Choose another image</string>
+    <string name="receipt_uploading_title">Uploading receipt…</string>
+    <string name="receipt_uploading_subtitle">Sending your receipt image securely.</string>
+    <string name="receipt_processing_title">Analyzing receipt…</string>
+    <string name="receipt_processing_subtitle">Reading the receipt and identifying the products and discounts.</string>
+    <string name="receipt_review_title">Review receipt</string>
+    <string name="receipt_review_found_banner">Here\'s what we found — review and adjust anything before confirming.</string>
+    <string name="receipt_review_merchant_label">Merchant</string>
+    <string name="receipt_review_merchant_hint">e.g. Esselunga</string>
+    <string name="receipt_review_date_label">Date</string>
+    <string name="receipt_review_total_label">Total</string>
+    <string name="receipt_review_subtotal_label">Subtotal</string>
+    <string name="receipt_review_total_discount_label">Total discount</string>
+    <string name="receipt_review_products_section">Products</string>
+    <string name="receipt_review_add_item">Add product</string>
+    <string name="receipt_review_empty_items">No products listed. You can still add products or confirm the total.</string>
+    <string name="receipt_review_item_description">Product description</string>
+    <string name="receipt_review_item_quantity">Qty</string>
+    <string name="receipt_review_item_unit_price">Unit price</string>
+    <string name="receipt_review_item_gross">Gross</string>
+    <string name="receipt_review_item_discount">Discount</string>
+    <string name="receipt_review_item_net">Net</string>
+    <string name="receipt_review_item_category">Item category</string>
+    <string name="receipt_review_adjustments_section">Discounts &amp; adjustments</string>
+    <string name="receipt_review_add_adjustment">Add adjustment</string>
+    <string name="receipt_review_adjustment_description">Description</string>
+    <string name="receipt_review_adjustment_amount">Amount</string>
+    <string name="receipt_review_adjustment_type_discount">Discount</string>
+    <string name="receipt_review_adjustment_type_surcharge">Surcharge</string>
+    <string name="receipt_review_adjustment_type_tax">Tax</string>
+    <string name="receipt_review_adjustment_type_other">Other</string>
+    <string name="receipt_review_totals_section">Summary</string>
+    <string name="receipt_review_confirm">Confirm</string>
+    <string name="receipt_review_discard_title">Discard scanned receipt?</string>
+    <string name="receipt_review_discard_message">You have unsaved changes. Discarding will cancel this receipt without creating a transaction.</string>
+    <string name="receipt_review_discard_confirm">Discard</string>
+    <string name="receipt_confirmed_title">Receipt confirmed</string>
+    <string name="receipt_confirmed_subtitle">Transaction added successfully.</string>
+    <string name="receipt_confirmed_view_transaction">View transaction</string>
+    <string name="receipt_confirmed_done">Done</string>
+    <string name="cd_edit_receipt_item">Edit product %1$s</string>
+    <string name="cd_remove_receipt_item">Remove product %1$s</string>
+    <string name="cd_remove_receipt_adjustment">Remove adjustment %1$s</string>
+    <string name="receipt_review_total_paid_label">Total paid</string>
+    <string name="receipt_review_transaction_amount_hint">This amount will be recorded as your transaction.</string>
+    <string name="receipt_review_item_original_price">Original</string>
+    <string name="receipt_review_item_paid">Paid</string>
+    <string name="receipt_review_savings_title">You saved</string>
+    <string name="receipt_review_original_value">Original value</string>
+    <string name="receipt_review_savings_label">Savings</string>
+    <string name="receipt_review_you_paid">You paid</string>
+    <string name="receipt_review_discounts_summary">Discounts</string>
+    <string name="receipt_review_edit_totals">Edit totals</string>
+    <string name="receipt_review_done_editing_totals">Done</string>
+    <string name="permission_camera_rationale_title">Camera access needed</string>
+    <string name="permission_camera_rationale_message">Allow camera access to take a photo of your receipt.</string>
+    <string name="permission_camera_permanently_denied_message">Camera permission is disabled. Open app settings to allow camera access, or choose an image from your gallery.</string>
+    <string name="permission_gallery_rationale_title">Photo access needed</string>
+    <string name="permission_gallery_rationale_message">Allow photo access so you can select a receipt image from your gallery.</string>
+    <string name="permission_gallery_permanently_denied_message">Photo access is disabled. Open app settings to allow photo access, or take a new photo with the camera.</string>
+    <string name="permission_action_open_settings">Open settings</string>
+    <string name="permission_action_grant">Allow access</string>
+
+    <!-- Edit Receipt Products in Transaction Form -->
+    <string name="transaction_form_receipt_products_section">Receipt products</string>
+    <string name="transaction_form_amount_derived_hint">Calculated automatically from receipt products and adjustments.</string>
+    <string name="transaction_form_edit_item_title">Edit product</string>
+    <string name="transaction_form_add_item_title">Add product</string>
+    <string name="transaction_form_remove_item_title">Remove product?</string>
+    <string name="transaction_form_remove_item_message">Remove \"%1$s\" from this receipt? Totals will be recalculated.</string>
+    <string name="action_remove">Remove</string>
+    <string name="validation_receipt_item_discount_exceeds_gross">Discount cannot exceed gross price.</string>
+    <string name="transaction_form_item_preview_label">Calculated total: %1$s</string>
 </resources>

@@ -51,11 +51,13 @@ sealed interface TransactionsEvent {
     data object ToggleSortOrder : TransactionsEvent
     data object ClearFilters : TransactionsEvent
     data object AddTransactionClick : TransactionsEvent
+    data object ScanReceiptClick : TransactionsEvent
     data class TransactionClick(val id: String) : TransactionsEvent
 }
 
 sealed interface TransactionsEffect {
     data object NavigateToAddTransaction : TransactionsEffect
+    data object NavigateToScanReceipt : TransactionsEffect
     data class NavigateToTransactionDetail(val id: String) : TransactionsEffect
 }
 

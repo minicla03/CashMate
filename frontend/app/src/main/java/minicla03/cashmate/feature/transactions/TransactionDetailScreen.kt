@@ -13,12 +13,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,7 +44,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -57,7 +63,17 @@ import minicla03.cashmate.core.designsystem.LoadingStateView
 import minicla03.cashmate.core.ui.CategoryIconBadge
 import minicla03.cashmate.core.ui.DateFormatter
 import minicla03.cashmate.core.ui.MoneyFormatter
+import minicla03.cashmate.domain.model.Category
+import minicla03.cashmate.domain.model.Receipt
+import minicla03.cashmate.domain.model.ReceiptAdjustment
+import minicla03.cashmate.domain.model.ReceiptAdjustmentType
+import minicla03.cashmate.domain.model.ReceiptItem
+import minicla03.cashmate.domain.model.TransactionSource
 import minicla03.cashmate.domain.model.TransactionType
+import minicla03.cashmate.feature.receipt.presentation.ReceiptCategoryResolver
+import minicla03.cashmate.feature.receipt.presentation.components.ReceiptSavingsCard
+import minicla03.cashmate.feature.receipt.presentation.components.ReceiptSummaryRow
+import java.util.Currency
 
 @Composable
 fun TransactionDetailRoute(
@@ -230,6 +246,17 @@ fun TransactionDetailScreen(
                         )
                     }
 
+                    val isReceiptTransaction = tx.source == TransactionSource.RECEIPT || tx.receiptId != null
+                    if (isReceiptTransaction) {
+                        TransactionReceiptSection(
+                            receipt = state.receipt,
+                            isLoading = state.isReceiptLoading,
+                            isUnavailable = state.receiptUnavailable,
+                            categories = state.categories,
+                            currency = state.currency
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(spacing.xs))
 
                     Row(
@@ -310,6 +337,271 @@ private fun DetailInfoRow(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun TransactionReceiptSection(
+    receipt: Receipt?,
+    isLoading: Boolean,
+    isUnavailable: Boolean,
+    categories: List<Category>,
+    currency: Currency
+) {
+    val spacing = CashMateTheme.spacing
+    val semantic = CashMateTheme.semanticColors
+
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
+        Text(
+            text = stringResource(R.string.transaction_detail_receipt_section),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() }
+        )
+
+        when {
+            isLoading -> {
+                CashMateCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Text(
+                            text = stringResource(R.string.loading_message),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            receipt != null -> {
+                if (receipt.merchant.isNotBlank()) {
+                    CashMateCard(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = stringResource(
+                                R.string.transaction_detail_receipt_merchant,
+                                receipt.merchant
+                            ),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                if (receipt.items.isNotEmpty()) {
+                    CashMateCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
+                            Text(
+                                text = stringResource(R.string.receipt_review_products_section),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            receipt.items.forEachIndexed { index, item ->
+                                if (index > 0) {
+                                    HorizontalDivider()
+                                }
+                                DetailReceiptItemRow(
+                                    item = item,
+                                    categories = categories,
+                                    currency = currency
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (receipt.adjustments.isNotEmpty()) {
+                    CashMateCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(spacing.xs)) {
+                            Text(
+                                text = stringResource(R.string.receipt_review_adjustments_section),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            receipt.adjustments.forEachIndexed { index, adjustment ->
+                                if (index > 0) {
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = spacing.xxs))
+                                }
+                                DetailReceiptAdjustmentRow(
+                                    adjustment = adjustment,
+                                    currency = currency
+                                )
+                            }
+                        }
+                    }
+                }
+
+                CashMateCard(modifier = Modifier.fillMaxWidth()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(spacing.xs)) {
+                        Text(
+                            text = stringResource(R.string.receipt_review_totals_section),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        ReceiptSummaryRow(
+                            label = stringResource(R.string.receipt_review_subtotal_label),
+                            value = MoneyFormatter.format(receipt.subtotal, currency)
+                        )
+                        if (receipt.totalDiscount.isPositive) {
+                            ReceiptSummaryRow(
+                                label = stringResource(R.string.receipt_review_discounts_summary),
+                                value = "-${MoneyFormatter.format(receipt.totalDiscount, currency)}",
+                                valueColor = semantic.income
+                            )
+                        }
+                        HorizontalDivider(modifier = Modifier.padding(vertical = spacing.xxs))
+                        ReceiptSummaryRow(
+                            label = stringResource(R.string.receipt_review_total_paid_label),
+                            value = MoneyFormatter.format(receipt.total, currency),
+                            valueColor = MaterialTheme.colorScheme.primary,
+                            bold = true
+                        )
+                    }
+                }
+
+                if (receipt.totalDiscount.isPositive) {
+                    ReceiptSavingsCard(
+                        subtotal = receipt.subtotal,
+                        savings = receipt.totalDiscount,
+                        totalPaid = receipt.total,
+                        currency = currency
+                    )
+                }
+            }
+
+            isUnavailable -> {
+                CashMateCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ReceiptLong,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.transaction_detail_receipt_unavailable),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailReceiptItemRow(
+    item: ReceiptItem,
+    categories: List<Category>,
+    currency: Currency
+) {
+    val spacing = CashMateTheme.spacing
+    val semantic = CashMateTheme.semanticColors
+    val resolvedCategory = ReceiptCategoryResolver.resolve(item.category, categories)
+    val categoryLabel = resolvedCategory?.name ?: item.category.takeIf { it.isNotBlank() }
+    val hasDiscount = item.discountAmount.isPositive || item.grossAmount > item.netAmount
+    val quantityAndPrice = "${item.quantity} × ${MoneyFormatter.format(item.unitPrice, currency)}"
+    val subtitle = if (categoryLabel != null) "$quantityAndPrice • $categoryLabel" else quantityAndPrice
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(spacing.xs)
+    ) {
+        CategoryIconBadge(
+            iconKey = resolvedCategory?.icon ?: "category",
+            colorHex = resolvedCategory?.color ?: "#546E7A",
+            size = 34.dp,
+            modifier = Modifier.padding(top = 2.dp)
+        )
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = item.description,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (item.discountAmount.isPositive) {
+                Text(
+                    text = "${stringResource(R.string.receipt_review_item_discount)}: -${
+                        MoneyFormatter.format(item.discountAmount, currency)
+                    }",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = semantic.income
+                )
+            }
+        }
+
+        Column(horizontalAlignment = Alignment.End) {
+            if (hasDiscount) {
+                Text(
+                    text = MoneyFormatter.format(item.grossAmount, currency),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textDecoration = TextDecoration.LineThrough
+                )
+            }
+            Text(
+                text = MoneyFormatter.format(item.netAmount, currency),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetailReceiptAdjustmentRow(
+    adjustment: ReceiptAdjustment,
+    currency: Currency
+) {
+    val semantic = CashMateTheme.semanticColors
+    val formatted = MoneyFormatter.format(adjustment.amount, currency)
+    val signed = when (adjustment.type) {
+        ReceiptAdjustmentType.DISCOUNT -> "-$formatted"
+        ReceiptAdjustmentType.SURCHARGE,
+        ReceiptAdjustmentType.TAX -> "+$formatted"
+        ReceiptAdjustmentType.OTHER -> formatted
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = adjustment.description,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = signed,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = if (adjustment.type == ReceiptAdjustmentType.DISCOUNT) {
+                semantic.income
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            }
         )
     }
 }

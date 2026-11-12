@@ -15,5 +15,8 @@ object ApiEndpoints {
     const val ACCOUNTS = "$API_PREFIX/accounts"
     const val DASHBOARD = "$API_PREFIX/dashboard"
     const val STATISTICS = "$API_PREFIX/statistics"
+
+    const val RECEIPT_PROCESS = "$API_PREFIX/receipts/process"
+    const val RECEIPT_CONFIRM = "$API_PREFIX/receipts/{id}/confirm"
 }
 

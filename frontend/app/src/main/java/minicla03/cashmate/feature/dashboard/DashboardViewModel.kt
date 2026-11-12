@@ -47,6 +47,7 @@ class DashboardViewModel @Inject constructor(
         when (event) {
             DashboardEvent.Refresh -> loadDashboard()
             DashboardEvent.AddTransactionClick -> sendEffect(DashboardEffect.NavigateToAddTransaction)
+            DashboardEvent.ScanReceiptClick -> sendEffect(DashboardEffect.NavigateToScanReceipt)
             DashboardEvent.ViewAllTransactionsClick -> sendEffect(DashboardEffect.NavigateToTransactions)
             is DashboardEvent.TransactionClick -> sendEffect(
                 DashboardEffect.NavigateToTransactionDetail(event.id)

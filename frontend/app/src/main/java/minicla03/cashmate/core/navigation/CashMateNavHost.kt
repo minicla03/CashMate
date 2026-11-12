@@ -34,11 +34,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import minicla03.cashmate.R
 import minicla03.cashmate.feature.categories.CategoriesRoute
 import minicla03.cashmate.feature.dashboard.DashboardRoute
+import minicla03.cashmate.feature.receipt.presentation.ReceiptReviewRoute
+import minicla03.cashmate.feature.receipt.presentation.ReceiptScanRoute
+import minicla03.cashmate.feature.receipt.presentation.ReceiptScanViewModel
 import minicla03.cashmate.feature.settings.SettingsRoute
 import minicla03.cashmate.feature.statistics.StatisticsRoute
 import minicla03.cashmate.feature.transactions.TransactionDetailRoute
@@ -145,6 +151,11 @@ fun CashMateAppScaffold(
                     onNavigateToAddTransaction = {
                         navController.navigate(CashMateRoute.TransactionForm())
                     },
+                    onNavigateToScanReceipt = {
+                        navController.navigate(CashMateRoute.ReceiptFlow) {
+                            launchSingleTop = true
+                        }
+                    },
                     onNavigateToTransactions = {
                         navigateTopLevel(TopLevelDestination.TRANSACTIONS)
                     },
@@ -158,6 +169,11 @@ fun CashMateAppScaffold(
                 TransactionsRoute(
                     onNavigateToAddTransaction = {
                         navController.navigate(CashMateRoute.TransactionForm())
+                    },
+                    onNavigateToScanReceipt = {
+                        navController.navigate(CashMateRoute.ReceiptFlow) {
+                            launchSingleTop = true
+                        }
                     },
                     onNavigateToTransactionDetail = { id ->
                         navController.navigate(CashMateRoute.TransactionDetail(id))
@@ -204,6 +220,53 @@ fun CashMateAppScaffold(
                         navController.navigate(CashMateRoute.Categories)
                     }
                 )
+            }
+
+            navigation<CashMateRoute.ReceiptFlow>(
+                startDestination = CashMateRoute.ReceiptScan
+            ) {
+                composable<CashMateRoute.ReceiptScan> { backStackEntry ->
+                    val flowEntry = remember(backStackEntry) {
+                        navController.getBackStackEntry(CashMateRoute.ReceiptFlow)
+                    }
+                    val viewModel: ReceiptScanViewModel = hiltViewModel(flowEntry)
+                    ReceiptScanRoute(
+                        viewModel = viewModel,
+                        onNavigateBack = {
+                            navController.popBackStack(CashMateRoute.ReceiptFlow, inclusive = true)
+                        },
+                        onNavigateToReview = { receiptId ->
+                            navController.navigate(CashMateRoute.ReceiptReview(receiptId)) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onNavigateToTransactionDetail = { txId ->
+                            navController.navigate(CashMateRoute.TransactionDetail(txId)) {
+                                popUpTo(CashMateRoute.ReceiptFlow) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable<CashMateRoute.ReceiptReview> { backStackEntry ->
+                    val route = backStackEntry.toRoute<CashMateRoute.ReceiptReview>()
+                    val flowEntry = remember(backStackEntry) {
+                        navController.getBackStackEntry(CashMateRoute.ReceiptFlow)
+                    }
+                    val viewModel: ReceiptScanViewModel = hiltViewModel(flowEntry)
+                    ReceiptReviewRoute(
+                        receiptId = route.receiptId,
+                        viewModel = viewModel,
+                        onExitFlow = {
+                            navController.popBackStack(CashMateRoute.ReceiptFlow, inclusive = true)
+                        },
+                        onNavigateToTransactionDetail = { txId ->
+                            navController.navigate(CashMateRoute.TransactionDetail(txId)) {
+                                popUpTo(CashMateRoute.ReceiptFlow) { inclusive = true }
+                            }
+                        }
+                    )
+                }
             }
         }
     }

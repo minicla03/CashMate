@@ -18,12 +18,14 @@ data class DashboardUiState(
 sealed interface DashboardEvent {
     data object Refresh : DashboardEvent
     data object AddTransactionClick : DashboardEvent
+    data object ScanReceiptClick : DashboardEvent
     data object ViewAllTransactionsClick : DashboardEvent
     data class TransactionClick(val id: String) : DashboardEvent
 }
 
 sealed interface DashboardEffect {
     data object NavigateToAddTransaction : DashboardEffect
+    data object NavigateToScanReceipt : DashboardEffect
     data object NavigateToTransactions : DashboardEffect
     data class NavigateToTransactionDetail(val id: String) : DashboardEffect
 }

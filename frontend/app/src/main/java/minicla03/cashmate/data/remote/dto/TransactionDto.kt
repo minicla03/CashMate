@@ -10,7 +10,10 @@ data class TransactionDto(
     val description: String,
     val categoryId: String,
     val accountId: String,
-    val date: String
+    val date: String,
+    val source: String = "MANUAL",
+    val receiptId: String? = null,
+    val receipt: ReceiptDraftDto? = null
 )
 
 @Serializable
@@ -30,7 +33,8 @@ data class UpdateTransactionRequest(
     val description: String,
     val categoryId: String,
     val accountId: String,
-    val date: String
+    val date: String,
+    val receipt: UpdateReceiptRequest? = null
 )
 
 data class TransactionFilterDto(

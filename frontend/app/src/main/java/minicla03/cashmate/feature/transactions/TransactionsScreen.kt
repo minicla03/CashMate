@@ -5,16 +5,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material3.DatePickerDialog
@@ -22,14 +28,17 @@ import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDateRangePickerState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,6 +70,7 @@ import java.time.ZoneOffset
 @Composable
 fun TransactionsRoute(
     onNavigateToAddTransaction: () -> Unit,
+    onNavigateToScanReceipt: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TransactionsViewModel = hiltViewModel()
@@ -80,6 +90,7 @@ fun TransactionsRoute(
         viewModel.effects.collect { effect ->
             when (effect) {
                 TransactionsEffect.NavigateToAddTransaction -> onNavigateToAddTransaction()
+                TransactionsEffect.NavigateToScanReceipt -> onNavigateToScanReceipt()
                 is TransactionsEffect.NavigateToTransactionDetail ->
                     onNavigateToTransactionDetail(effect.id)
             }
@@ -193,6 +204,50 @@ private fun TransactionsFilterHeader(
             .padding(horizontal = spacing.md, vertical = spacing.xs),
         verticalArrangement = Arrangement.spacedBy(spacing.xs)
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing.xs)
+        ) {
+            OutlinedButton(
+                onClick = { onEvent(TransactionsEvent.AddTransactionClick) },
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = spacing.minTouchTarget),
+                shape = MaterialTheme.shapes.small
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.dashboard_add_first),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            FilledTonalButton(
+                onClick = { onEvent(TransactionsEvent.ScanReceiptClick) },
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = spacing.minTouchTarget),
+                shape = MaterialTheme.shapes.small
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.DocumentScanner,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.receipt_scan_action),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
         OutlinedTextField(
             value = state.searchQuery,
             onValueChange = { onEvent(TransactionsEvent.SearchQueryChanged(it)) },

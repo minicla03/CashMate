@@ -13,6 +13,7 @@ import minicla03.cashmate.core.error.AppError
 import minicla03.cashmate.data.repository.InMemoryUserPreferencesRepository
 import minicla03.cashmate.domain.model.Category
 import minicla03.cashmate.domain.model.Money
+import minicla03.cashmate.domain.model.Receipt
 import minicla03.cashmate.domain.model.Transaction
 import minicla03.cashmate.domain.model.TransactionFilter
 import minicla03.cashmate.domain.model.TransactionSortOrder
@@ -106,6 +107,8 @@ class TransactionsViewModelTest {
             override suspend fun getTransaction(id: String) = AppResult.Error(AppError.Network.NotFound)
             override suspend fun createTransaction(transaction: Transaction) = AppResult.Success(transaction)
             override suspend fun updateTransaction(transaction: Transaction) = AppResult.Success(transaction)
+            override suspend fun updateTransactionWithReceipt(transaction: Transaction, receipt: Receipt) =
+                AppResult.Success(transaction)
             override suspend fun deleteTransaction(id: String) = AppResult.Success(Unit)
         }
         val catRepo = object : CategoryRepository {

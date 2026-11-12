@@ -19,10 +19,12 @@ import kotlinx.coroutines.launch
 import minicla03.cashmate.core.common.AppResult
 import minicla03.cashmate.core.common.getOrNull
 import minicla03.cashmate.core.ui.toUiError
+import minicla03.cashmate.domain.model.TransactionSource
 import minicla03.cashmate.domain.repository.UserPreferencesRepository
 import minicla03.cashmate.domain.usecase.DeleteTransactionUseCase
 import minicla03.cashmate.domain.usecase.GetAccountsUseCase
 import minicla03.cashmate.domain.usecase.GetCategoriesUseCase
+import minicla03.cashmate.domain.usecase.GetTransactionReceiptUseCase
 import minicla03.cashmate.domain.usecase.GetTransactionUseCase
 import javax.inject.Inject
 
@@ -30,6 +32,7 @@ import javax.inject.Inject
 class TransactionDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getTransactionUseCase: GetTransactionUseCase,
+    private val getTransactionReceiptUseCase: GetTransactionReceiptUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val getAccountsUseCase: GetAccountsUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
@@ -92,20 +95,45 @@ class TransactionDetailViewModel @Inject constructor(
                 when (txResult) {
                     is AppResult.Success -> {
                         val tx = txResult.data
+                        val hasReceiptOrigin = tx.source == TransactionSource.RECEIPT || tx.receiptId != null
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
                                 transaction = tx,
                                 category = categories.firstOrNull { c -> c.id == tx.categoryId },
                                 account = accounts.firstOrNull { a -> a.id == tx.accountId },
+                                categories = categories,
+                                receipt = if (hasReceiptOrigin) it.receipt else null,
+                                isReceiptLoading = hasReceiptOrigin,
+                                receiptUnavailable = false,
                                 error = null
                             )
+                        }
+                        if (hasReceiptOrigin) {
+                            when (val receiptResult = getTransactionReceiptUseCase(tx.id)) {
+                                is AppResult.Success -> _uiState.update {
+                                    it.copy(
+                                        receipt = receiptResult.data,
+                                        isReceiptLoading = false,
+                                        receiptUnavailable = receiptResult.data == null
+                                    )
+                                }
+
+                                is AppResult.Error -> _uiState.update {
+                                    it.copy(
+                                        receipt = null,
+                                        isReceiptLoading = false,
+                                        receiptUnavailable = true
+                                    )
+                                }
+                            }
                         }
                     }
 
                     is AppResult.Error -> _uiState.update {
                         it.copy(
                             isLoading = false,
+                            isReceiptLoading = false,
                             error = txResult.error.toUiError()
                         )
                     }

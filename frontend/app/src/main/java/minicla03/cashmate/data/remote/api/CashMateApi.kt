@@ -3,19 +3,24 @@ package minicla03.cashmate.data.remote.api
 import minicla03.cashmate.core.network.ApiEndpoints
 import minicla03.cashmate.data.remote.dto.AccountDto
 import minicla03.cashmate.data.remote.dto.CategoryDto
+import minicla03.cashmate.data.remote.dto.ConfirmReceiptRequest
 import minicla03.cashmate.data.remote.dto.CreateCategoryRequest
 import minicla03.cashmate.data.remote.dto.CreateTransactionRequest
 import minicla03.cashmate.data.remote.dto.DashboardDto
+import minicla03.cashmate.data.remote.dto.ReceiptDraftDto
 import minicla03.cashmate.data.remote.dto.StatisticsDto
 import minicla03.cashmate.data.remote.dto.TransactionDto
 import minicla03.cashmate.data.remote.dto.UpdateCategoryRequest
 import minicla03.cashmate.data.remote.dto.UpdateTransactionRequest
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -80,5 +85,17 @@ interface CashMateApi {
 
     @GET(ApiEndpoints.STATISTICS)
     suspend fun getStatistics(): StatisticsDto
+
+    @Multipart
+    @POST(ApiEndpoints.RECEIPT_PROCESS)
+    suspend fun processReceipt(
+        @Part image: MultipartBody.Part
+    ): ReceiptDraftDto
+
+    @POST(ApiEndpoints.RECEIPT_CONFIRM)
+    suspend fun confirmReceipt(
+        @Path("id") id: String,
+        @Body request: ConfirmReceiptRequest
+    ): TransactionDto
 }
 

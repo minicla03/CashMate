@@ -8,7 +8,9 @@ import minicla03.cashmate.data.remote.datasource.AccountRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.CategoryRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.FakeAccountRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.FakeCategoryRemoteDataSource
+import minicla03.cashmate.data.remote.datasource.FakeReceiptRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.FakeTransactionRemoteDataSource
+import minicla03.cashmate.data.remote.datasource.ReceiptRemoteDataSource
 import minicla03.cashmate.data.remote.datasource.TransactionRemoteDataSource
 import javax.inject.Singleton
 
@@ -37,5 +39,11 @@ abstract class DataSourceModule {
     abstract fun bindAccountRemoteDataSource(
         impl: FakeAccountRemoteDataSource
     ): AccountRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindReceiptRemoteDataSource(
+        impl: FakeReceiptRemoteDataSource
+    ): ReceiptRemoteDataSource
 }
 

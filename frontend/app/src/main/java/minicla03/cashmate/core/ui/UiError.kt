@@ -17,9 +17,13 @@ fun AppError.toUiError(): UiError = when (this) {
     AppError.Network.Timeout -> UiError(R.string.error_timeout, canRetry = true)
     AppError.Network.Unauthorized -> UiError(R.string.error_unauthorized, canRetry = false)
     AppError.Network.Forbidden -> UiError(R.string.error_forbidden, canRetry = false)
+    AppError.Network.BadRequest -> UiError(R.string.error_bad_request, canRetry = false)
     AppError.Network.NotFound -> UiError(R.string.error_not_found, canRetry = true)
     AppError.Network.ServerError -> UiError(R.string.error_server, canRetry = true)
     AppError.Network.Unknown -> UiError(R.string.error_network_unknown, canRetry = true)
+    AppError.Receipt.ProcessingFailed -> UiError(R.string.error_receipt_processing_failed, canRetry = true)
+    AppError.Receipt.InvalidReceipt -> UiError(R.string.error_receipt_invalid, canRetry = false)
+    AppError.Receipt.UnsupportedImage -> UiError(R.string.error_receipt_unsupported_image, canRetry = false)
     is AppError.BusinessRule -> UiError(reason.toMessageResId(), canRetry = false)
     is AppError.Validation -> UiError(R.string.error_unknown, canRetry = false)
     AppError.Unknown -> UiError(R.string.error_unknown, canRetry = true)
@@ -30,6 +34,7 @@ fun BusinessErrorReason.toMessageResId(): Int = when (this) {
     BusinessErrorReason.CATEGORY_IN_USE -> R.string.error_category_in_use
     BusinessErrorReason.CATEGORY_ALREADY_EXISTS -> R.string.error_category_duplicate
     BusinessErrorReason.CANNOT_DELETE_LAST_CATEGORY -> R.string.error_last_category
+    BusinessErrorReason.RECEIPT_NOT_READY -> R.string.error_receipt_not_ready
 }
 
 fun AppError.Validation.toFieldMessageResIds(): Map<ValidationField, Int> =
@@ -52,5 +57,15 @@ fun ValidationReason.toMessageResId(field: ValidationField): Int = when (field) 
         ValidationReason.TOO_LONG -> R.string.validation_category_name_too_long
         else -> R.string.validation_category_name_required
     }
+    ValidationField.MERCHANT -> when (this) {
+        ValidationReason.TOO_LONG -> R.string.validation_merchant_too_long
+        else -> R.string.validation_merchant_required
+    }
+    ValidationField.TOTAL -> R.string.validation_receipt_total_positive
+    ValidationField.ITEM_DESCRIPTION -> R.string.validation_receipt_item_description_required
+    ValidationField.ITEM_QUANTITY -> R.string.validation_receipt_item_quantity_positive
+    ValidationField.ITEM_PRICE -> R.string.validation_receipt_item_price_non_negative
+    ValidationField.ADJUSTMENT_DESCRIPTION -> R.string.validation_receipt_adjustment_description_required
+    ValidationField.ADJUSTMENT_AMOUNT -> R.string.validation_receipt_adjustment_amount_non_negative
 }
 

@@ -15,6 +15,7 @@ import minicla03.cashmate.data.repository.InMemoryUserPreferencesRepository
 import minicla03.cashmate.domain.model.Account
 import minicla03.cashmate.domain.model.Category
 import minicla03.cashmate.domain.model.Money
+import minicla03.cashmate.domain.model.Receipt
 import minicla03.cashmate.domain.model.Transaction
 import minicla03.cashmate.domain.model.TransactionFilter
 import minicla03.cashmate.domain.model.TransactionType
@@ -100,6 +101,8 @@ class DashboardViewModelTest {
             override suspend fun getTransaction(id: String) = AppResult.Error(AppError.Network.NotFound)
             override suspend fun createTransaction(transaction: Transaction) = AppResult.Success(transaction)
             override suspend fun updateTransaction(transaction: Transaction) = AppResult.Success(transaction)
+            override suspend fun updateTransactionWithReceipt(transaction: Transaction, receipt: Receipt) =
+                AppResult.Success(transaction)
             override suspend fun deleteTransaction(id: String) = AppResult.Success(Unit)
         }
         val viewModel = createViewModel(txRepo = txRepo)
@@ -131,6 +134,8 @@ class DashboardViewModelTest {
             override suspend fun getTransaction(id: String) = AppResult.Error(AppError.Network.NotFound)
             override suspend fun createTransaction(transaction: Transaction) = AppResult.Success(transaction)
             override suspend fun updateTransaction(transaction: Transaction) = AppResult.Success(transaction)
+            override suspend fun updateTransactionWithReceipt(transaction: Transaction, receipt: Receipt) =
+                AppResult.Success(transaction)
             override suspend fun deleteTransaction(id: String) = AppResult.Success(Unit)
         }
         val categoryRepo = object : CategoryRepository {

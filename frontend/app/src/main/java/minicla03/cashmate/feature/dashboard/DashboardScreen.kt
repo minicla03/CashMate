@@ -4,23 +4,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -60,6 +67,7 @@ import java.util.Currency
 @Composable
 fun DashboardRoute(
     onNavigateToAddTransaction: () -> Unit,
+    onNavigateToScanReceipt: () -> Unit,
     onNavigateToTransactions: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -80,6 +88,7 @@ fun DashboardRoute(
         viewModel.effects.collect { effect ->
             when (effect) {
                 DashboardEffect.NavigateToAddTransaction -> onNavigateToAddTransaction()
+                DashboardEffect.NavigateToScanReceipt -> onNavigateToScanReceipt()
                 DashboardEffect.NavigateToTransactions -> onNavigateToTransactions()
                 is DashboardEffect.NavigateToTransactionDetail ->
                     onNavigateToTransactionDetail(effect.id)
@@ -179,6 +188,52 @@ private fun DashboardContent(
                 currency = currency,
                 onRefresh = { onEvent(DashboardEvent.Refresh) }
             )
+        }
+
+        item(key = "quick_actions") {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(spacing.xs)
+            ) {
+                OutlinedButton(
+                    onClick = { onEvent(DashboardEvent.AddTransactionClick) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = spacing.minTouchTarget),
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.dashboard_add_first),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                FilledTonalButton(
+                    onClick = { onEvent(DashboardEvent.ScanReceiptClick) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = spacing.minTouchTarget),
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.DocumentScanner,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.receipt_scan_action),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
 
         item(key = "monthly_metrics") {

@@ -27,5 +27,14 @@ sealed interface CashMateRoute {
 
     @Serializable
     data object Settings : CashMateRoute
+
+    @Serializable
+    data object ReceiptFlow : CashMateRoute
+
+    @Serializable
+    data object ReceiptScan : CashMateRoute
+
+    @Serializable
+    data class ReceiptReview(val receiptId: String) : CashMateRoute
 }
 
